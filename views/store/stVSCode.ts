@@ -16,8 +16,10 @@ export const isVSCode = vscode !== undefined;
 export const cmd2Ex: (o: T_V2E)=> void = vscode
 	? o=> vscode.postMessage(o)
 	: o=> console.log('cmd2Ex:%o', o);
-export const info = (mes: string)=> cmd2Ex({cmd: 'info', mes});
-export const warn = (mes: string)=> cmd2Ex({cmd: 'warn', mes});
+// export const info = (mes: string)=> cmd2Ex({cmd: 'info', mes});
+	// 未使用（内部からも呼ばれていない。2026-11-10 棚卸しでコメントアウト。
+	// 要るようになったら戻すだけでよい）
+const warn = (mes: string)=> cmd2Ex({cmd: 'warn', mes});
 export const openURL = (url: string)=> cmd2Ex({cmd: 'openURL', url});
 export const copyTxt = (id: string)=> cmd2Ex({cmd: 'copyTxt', id});
 

@@ -150,11 +150,11 @@
 	[src/WorkSpaces.ts](../WorkSpaces.ts)）。調べに行く意味が無いため。
 	エンジン差で隠さない方針とは別扱い（あちらは「実装されているかは各サイトを見る」話）
 	- 🐛 **md を消してはいけない理由が判明。** LSP のタグ表 `LspWs.#hTag` は
-	**md.json から作られる**（[server/src/LspWs.ts:688](../../server/src/LspWs.ts:688)）。
+	**md.json から作られる**（[server/src/LspWs.ts:688](../../server/src/LspWs.ts#L688)）。
 	md に無い名前はタグと認識されず**マクロ扱い**になり
-	（[LspWs.ts:2102](../../server/src/LspWs.ts:2102)）、
+	（[LspWs.ts:2102](../../server/src/LspWs.ts#L2102)）、
 	「未定義マクロ[$]を使用、あるいはスペルミスです」の診断が出る
-	（[LspWs.ts:1722](../../server/src/LspWs.ts:1722)）。
+	（[LspWs.ts:1722](../../server/src/LspWs.ts#L1722)）。
 	⇒ **この2件の md を足すまで、既存シナリオに誤診断が出ていた**（今回の副産物）
 	- 逆方向（相手側に無いタグを隠す）は**やらない方針**。リファレンスは
 	「調べられること」が役目なので隠さない。実装状況は各サイトの記載に従う
@@ -166,7 +166,7 @@
 	→ **無用化（2026-09-12）。ギャラリーが分家（BlueSNovel）でも動くようになったため、
 	エンジン別にリンクを切り替える必要自体が無くなった**
 	- `famibee.github.io/SKYNovel_gallery/` への 38 箇所、
-	[src/TreeDPDoc.ts:25](../TreeDPDoc.ts:25) の【ドキュメント・連絡先】ツリーとも
+	[src/TreeDPDoc.ts:25](../TreeDPDoc.ts#L25) の【ドキュメント・連絡先】ツリーとも
 	SKYNovel 固定のまま据え置いてよい
 
 - ~~**`upd_url.json` 生成 CLI/コマンド（`update_check` URL上書き機構）**~~

@@ -7,10 +7,11 @@
 
 // 公開前チェック（bun run release_chk）
 //	1. ソース走査 …… 無断でパッケージマネージャを叩く箇所が増えていないか
-//	2. ビルド …… vsce package（prepublish で tsc の型検査 → esbuild）
-//	3. vsix 検査 …… 想定外のファイルが入っていないか・必要なファイルがあるか
-//	4. dist 検査 …… 巨大な依存の混入・資格情報ファイル読み取りコードの混入
-//	5. SHA256 …… リリースノート用に出力
+//	2. dependencies 検査 …… 本体バンドルに混ぜてはいけない依存が入っていないか
+//	3. ビルド …… vsce package（prepublish で bun check の型検査 → esbuild）
+//	4. vsix 検査 …… 想定外のファイルが入っていないか・必要なファイルがあるか
+//	5. dist 検査 …… 巨大な依存の混入・資格情報ファイル読み取りコードの混入
+//	6. SHA256 …… リリースノート用に出力
 //
 // 公開（vsce publish）はしない。PAT を CI に置きたくないので手動のまま。
 //	詳細は src/docs/release.md「公開前チェック」を参照
@@ -115,6 +116,8 @@ const A_REJECT_OWN = [
 	/(?:^|\/)tsconfig[^/]*\.json$/,
 	/(?:^|\/)TODO\.md$/,		/(?:^|\/)CLAUDE\.md$/,
 	/(?:^|\/)release_chk\.ts$/,	/(?:^|\/)build\.ts$/,
+	/(?:^|\/)vite\.config\./,
+		// views/vite.config.mts。.vscodeignore の **/*.ts に一致せず同梱されていた
 	/(?:^|\/)\.vscode-test/,
 		// 統合テスト（bun run test:int）が作る VSCode のユーザーデータ。
 		// 一度これを 140 ファイルまるごと vsix に混入させたので検査に加えた

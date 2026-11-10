@@ -2,8 +2,8 @@
 	"compileOnSave": true,
 	"extends": "../tsconfig.json",
 		// ルートと同じ厳しさ（strict + noUncheckedIndexedAccess など）で検査する。
-		// webpack の ts-loader は server/src も import type 経由でルート設定で検査する
-		// ため、設定が違うと「片方では必要・片方では不要」な記述になってしまう。
+		// 型検査（bun run chk:types = tsconfig.chk.json）は server/src もルート設定で
+		// 検査するため、設定が違うと「片方では必要・片方では不要」な記述になってしまう。
 		// lib の DOM は src/ConfigBase.ts の型（HTMLImageElement 等）用にルート側で指定
 	"compilerOptions": {
 		"outDir": "../dist/",

@@ -30,12 +30,12 @@ Win側セッションで `test:int`・`test:ui`・`chk:types` 全通過を確認
 
 | # | 何が起きるか | どこ | 重さ |
 |---|---|---|---|
-| 1 | ✅ **決着済み・2026-09-13**（別プロジェクトの設定でファイルが暗号化される） | [WatchFile.ts:31](../batch/WatchFile.ts:31) | **最重**（[file-watch.md](file-watch.md)(A) と同一。あちらに詳細） |
+| 1 | ✅ **決着済み・2026-09-13**（別プロジェクトの設定でファイルが暗号化される） | [WatchFile.ts:31](../batch/WatchFile.ts#L31) | **最重**（[file-watch.md](file-watch.md)(A) と同一。あちらに詳細） |
 | 2 | ✅ **決着済み・2026-09-13**（フォルダを閉じても LSP が解放されない） | [LangSrv.ts](../../server/src/LangSrv.ts) | 大（[build.md](build.md) §3.10 と同一。あちらに詳細） |
 | 3 | ✅ **決着済み・2026-09-13**（フォルダを閉じても Project が残り続ける） | [WorkSpaces.ts](../WorkSpaces.ts) `#refresh()` | 大 |
 | 4 | ✅ **決着済み・2026-09-13**（フォルダを閉じると、閉じたのと別の行がツリーから消える） | [WorkSpaces.ts](../WorkSpaces.ts) `#refresh()` | 中・**必ず起きる** |
 | 5 | ✅ **決着済み・2026-09-13**（フォルダを2つ以上まとめて追加すると1つしか認識しない） | [WorkSpaces.ts](../WorkSpaces.ts) `#refresh()` | 中 |
-| 6 | ✅ **決着済み・2026-09-13**（名前が前方一致するプロジェクトへ誤配される） | [LangSrv.ts:27](../../server/src/LangSrv.ts:27) / [WorkSpaces.ts](../WorkSpaces.ts) | 中・条件付き |
+| 6 | ✅ **決着済み・2026-09-13**（名前が前方一致するプロジェクトへ誤配される） | [LangSrv.ts:27](../../server/src/LangSrv.ts#L27) / [WorkSpaces.ts](../WorkSpaces.ts) | 中・条件付き |
 
 ### 個別
 
@@ -122,11 +122,11 @@ Win側セッションで `test:int`・`test:ui`・`chk:types` 全通過を確認
 | 場所 | 形 |
 |---|---|
 | LSP 本体 | **ワークスペースフォルダごとに `LspWs` を1つ**（`mLspWs`）。設計は正しい |
-| [Debugger.ts:46](../Debugger.ts:46) | `#hcurPrj2Dbg` … プロジェクトで引く |
-| [CteScore.ts:156](../CteScore.ts:156) | `#hCur2Me` … パスで引く |
-| [PrjTreeItem.ts:142](../PrjTreeItem.ts:142) | `#hPathWs2onBtn` … ワークスペースで引く |
-| [PrjSetting.ts:173](../PrjSetting.ts:173) | `#hWsFld2token` … フォルダで引く |
-| [Project.ts:693](../Project.ts:693) | `#aPickItems` … **インスタンスの持ち物**。エンジン別のリファレンスはこれで正しく分かれる |
+| [Debugger.ts:46](../Debugger.ts#L46) | `#hcurPrj2Dbg` … プロジェクトで引く |
+| [CteScore.ts:156](../CteScore.ts.frozen#L156) | `#hCur2Me` … パスで引く |
+| [PrjTreeItem.ts:142](../PrjTreeItem.ts#L142) | `#hPathWs2onBtn` … ワークスペースで引く |
+| [PrjSetting.ts:173](../PrjSetting.ts#L173) | `#hWsFld2token` … フォルダで引く |
+| [Project.ts:693](../Project.ts#L693) | `#aPickItems` … **インスタンスの持ち物**。エンジン別のリファレンスはこれで正しく分かれる |
 
 **全体で1つでよい**もの（マシンや拡張機能に属し、プロジェクトに属さない）：
 

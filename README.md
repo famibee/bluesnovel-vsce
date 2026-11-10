@@ -528,11 +528,11 @@ Development follows these documents: [Marketplace Publisher Agreement](https://c
 	- [Automatically launch and connect the app and browser versions](#Automatically-launch-and-connect-the-app-and-browser-versions)
 	- [About the Debug Button Bar](#About-the-Debug-Button-Bar)
 	- [breakpoint stop](#breakpoint-stop)
-		- [(A) line breakpoint](#(A)-line-breakpoint)
-		- [(B) conditional breakpoint](#(B)-conditional-breakpoint)
-		- [(C) hit-count breakpoint](#hit-(C)-count-breakpoint)
-		- [(D) data breakpoint](#(D)-data-breakpoint)
-		- [(E) function breakpoint](#(E)-function-breakpoint)
+		- [(A) line breakpoint](#a-line-breakpoint)
+		- [(B) conditional breakpoint](#b-conditional-breakpoint)
+		- [(C) hit-count breakpoint](#c-hit-count-breakpoint)
+		- [(D) data breakpoint](#d-data-breakpoint)
+		- [(E) function breakpoint](#e-function-breakpoint)
 	- [Variable View](#Variable-View)
 	- [Watching View](#Watching-View)
 	- [call stack view](#call-stack-view)
@@ -549,20 +549,20 @@ Development follows these documents: [Marketplace Publisher Agreement](https://c
 	- 現在デバッグできるのは、非パッケージ化・デバッグ起動アプリのみです。
 
 - [デバッガー機能概要](#デバッガー機能概要)
-	- [アプリ・ブラウザ版の起動と接続を自動で](#アプリ・ブラウザ版の起動と接続を自動で)
+	- [アプリ・ブラウザ版の起動と接続を自動で](#アプリブラウザ版の起動と接続を自動で)
 	- [デバッグボタンバーについて](#デバッグボタンバーについて)
 	- [ブレークポイント停止](#ブレークポイント停止)（通ったら、タグや&変数操作処理前にブレーク）
-		- [(A) 行ブレークポイント](#(A)-行ブレークポイント)
-		- [(B) 条件式ブレークポイント](#(B)-条件式ブレークポイント)（条件式が真なら、（略）処理前にブレーク）
-		- [(C) ヒットカウントブレークポイント](#(C)-ヒットカウントブレークポイント)（ｎ回以上通ったら、（略）処理前にブレーク）
-		- [(D) データブレークポイント](#(D)-データブレークポイント)（変数値が変化したときにブレーク）
-		- [(E) 関数ブレークポイント](#(E)-関数ブレークポイント)（指定したタグやマクロが呼ばれる直前にブレーク）
+		- [(A) 行ブレークポイント](#a-行ブレークポイント)
+		- [(B) 条件式ブレークポイント](#b-条件式ブレークポイント)（条件式が真なら、（略）処理前にブレーク）
+		- [(C) ヒットカウントブレークポイント](#c-ヒットカウントブレークポイント)（ｎ回以上通ったら、（略）処理前にブレーク）
+		- [(D) データブレークポイント](#d-データブレークポイント)（変数値が変化したときにブレーク）
+		- [(E) 関数ブレークポイント](#e-関数ブレークポイント)（指定したタグやマクロが呼ばれる直前にブレーク）
 	- [変数ビュー](#変数ビュー)（スクリプト実行位置の変数値を表示）
 	- [ウォッチ式ビュー](#ウォッチ式ビュー)
 	- [コールスタックビュー](#コールスタックビュー)
 	- [デバッグコンソールREPL](#デバッグコンソールREPL)（Read-Eval-Print Loop）、ブレーク時に式を手入力して値を調べられる
-- [停止中、変数にホバーすると値を表示](#停止中、変数にホバーすると値を表示)
-- [デバッグ開始時、空白やコメントのみの行に指定されたブレークポイントを後ろにずらす機能](#デバッグ開始時、空白やコメントのみの行に指定されたブレークポイントを後ろにずらす機能)
+- [停止中、変数にホバーすると値を表示](#停止中変数にホバーすると値を表示)
+- [デバッグ開始時、空白やコメントのみの行に指定されたブレークポイントを後ろにずらす機能](#デバッグ開始時空白やコメントのみの行に指定されたブレークポイントを後ろにずらす機能)
 
 
 ---

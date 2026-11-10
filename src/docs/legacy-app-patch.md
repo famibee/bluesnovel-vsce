@@ -744,7 +744,7 @@ sn_extension側：[genLegacyPatch.ts](../genLegacyPatch.ts)が`assertHasExperien
    （`genLegacyPatch.ts`は警告を表示するのみで生成は止めない）。
    **この機構が無い古いビルドの購入者も②のフォールバックにより救済できる**
    （購入者に当時のインストーラー本体を選んでもらう一手間がかかる。
-   [patch_app/src/main.rs](../../patch_app/src/main.rs)の`process_app()`参照）。
+   [patch_app/src/lib.rs](../../patch_app/src/lib.rs)の`process_app()`参照）。
    唯一の制約は体験版混入の自動検証ができないこと（②では体験版・製品版の中身の
    違いを機械的に確認する手段がないため、開発者が目視で確認する必要がある）
 9. ✅ **archを一切見ていない → macOS 27 Golden Gate（Rosetta終了予定）を受けて
@@ -767,7 +767,7 @@ sn_extension側：[genLegacyPatch.ts](../genLegacyPatch.ts)が`assertHasExperien
    役割が生まれた。
 
    **しかし現状の実装は、まさにこのケースで壊れる**：「既に最新版がインストール
-   済みならDLをスキップする」判定（[patch_app/src/main.rs:86](../../patch_app/src/main.rs#L86)、
+   済みならDLをスキップする」判定（[patch_app/src/lib.rs](../../patch_app/src/lib.rs)、
    `checksum_latest == installed_hash`）は、`setting.sn`の中身（または
    インストーラー本体のサンプル）から作るチェックサムの一致だけを見ており、
    **archの情報を一切見ていない**。開発者がバージョン番号を変えずにx64ビルドから
@@ -795,7 +795,7 @@ sn_extension側：[genLegacyPatch.ts](../genLegacyPatch.ts)が`assertHasExperien
      `${name}-${version}-${arch}.${ext}`）から抽出する。抽出できなければ空文字列のまま
      ＝archチェックを行わない従来動作にフォールバックする
    - スキップ判定を「`checksumLatest`が一致し、**かつ**archも一致する場合のみ
-     スキップ」に変更（[main.rs](../../patch_app/src/main.rs)の`process_app()`）。
+     スキップ」に変更（[lib.rs](../../patch_app/src/lib.rs)の`process_app()`）。
      ただしarch判定は自動検出（①setting.sn抽出）が成功した場合にしか行えない
      （②購入者にインストーラー本体を選ばせるフォールバック時は、インストール済み
      アプリ本体のパス自体が手に入らないため）。archが判定できない場合は

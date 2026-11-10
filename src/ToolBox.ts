@@ -94,7 +94,6 @@ export class ToolBox implements WebviewViewProvider {
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data: ${wv.cspSource} https:; script-src 'nonce-${nonce}' ${wv.cspSource}; style-src ${wv.cspSource} 'unsafe-inline'; font-src ${wv.cspSource};"/>
 <link rel="stylesheet" href="${path}/lib/bootstrap.min.css">
 <link rel="stylesheet" href="${path}/lib/bootstrap2vscode.css">
-<link rel="stylesheet" href="${path}/lib/fontawesome/all.min.css">
 <style>
 	body {
 		padding: 0 var(--container-paddding);
@@ -107,7 +106,6 @@ export class ToolBox implements WebviewViewProvider {
 	.btn {text-transform: none; font-size: 14px;}
 </style>
 <script defer nonce="${nonce}" src="${path}/lib/bootstrap.bundle.min.js"></script>
-<script defer nonce="${nonce}" src="${path}/lib/fontawesome/all.min.js"></script>
 <script defer nonce="${nonce}" src="${path}/toolbox.js"></script>
 </head>
 <body>

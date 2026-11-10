@@ -14,7 +14,7 @@ import type {FULL_PATH, WORKSPACE_PATH} from './CmnShare';
 
 // =============== Global
 
-export let useBun = false;		// bun が使える環境か
+let useBun = false;		// bun が使える環境か（chkBun/cnvPM のみが読む。他ファイルから直接は読まない）
 
 /**
  * bun の有無を調べる。ActivityBar の環境確認と WorkSpaces.start（タスク生成前）が
@@ -54,8 +54,9 @@ export function cnvPM(cmd: string) {return ! useBun ? cmd : cmd
  * 変わらないので、パスに bluesnovel を含むかどうかだけを見る。
  * 読めない・見つからない場合は SKYNovel 扱い（従来の挙動）。
  *
- * 拡張機能（src/Project.ts）と LSP（server/src/LspWs.ts）の両方から使う。
- * LSP 側は FLD_SRC を知らないので、ワークスペースパスだけで判定できる形にしてある
+ * 呼ぶのは拡張機能側（src/Project.ts の `is_blues`）だけ。LSP（server/src/LspWs.ts）は
+ * このファイルを import できない（fs-extra 一式が混入する）ので、結果を
+ * `ready` メッセージの `is_blues` で受け取る
  */
 export function isBluesPrj(pathWs: WORKSPACE_PATH): boolean {
 	for (const fld of ['src', 'core']) {	// 新テンプレは src、旧テンプレは core

@@ -33,7 +33,7 @@ let on = false;
  * UI テストは VSCode の外から画面を操作するので、`activate()` の戻り値
  * （統合テストが使う入口）には手が届かない。ファイル経由なら読める
  */
-export const FP_TRACE = `${tmpdir()}/sn_ext_trace.json`;
+const FP_TRACE = `${tmpdir()}/sn_ext_trace.json`;
 let tm: ReturnType<typeof setTimeout> | undefined;
 function dump() {		// 連続するので少しまとめる
 	clearTimeout(tm);

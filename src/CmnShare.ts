@@ -77,19 +77,6 @@ export function longestUnderPath<T>(fp: FULL_PATH, entries: Iterable<readonly [F
 	return best?.[1];
 }
 
-// ⚠️ 以下3つは server/src がまだ使用中（vscode-uri 移行は§3.10 Stage1 B-2）。
-// 拡張機能側（src/）はこの3つを使わず normFp() に統一済み
-export type FULL_SCH_PATH	= string;	// file://c:\[user]\...\[prj]/doc/prj/
-
-export function fullSchPath2fp(fsp: FULL_SCH_PATH): FULL_PATH {
-	return <FULL_PATH>decodeURIComponent(fsp.replace(/file:\/\/(\/\w%3A)?/, ''));
-}	// 似たような名前のメソッドになるので目立たせる
-	// 逆方向は難しそう、変換前の値は保存必要か
-
-export const fp2fullSchPath: (fp: FULL_PATH)=> FULL_SCH_PATH = is_win
-	? fp=> 'file://c:'+ encodeURI(fp)
-	: fp=> 'file://'+ encodeURI(fp);
-
 /**
  * 拡張子を除いたファイル名。`basename(path, extname(path))` と同じ結果を返すが、
  * `node:path` を使わない（このファイルの方針。上のコメント参照）。

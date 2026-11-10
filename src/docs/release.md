@@ -56,15 +56,14 @@
 |---|---|
 | `bun run watch` | 開発。デバッグ実行（F5）の preLaunchTask が自動で呼ぶ。vite と esbuild の watch |
 | `bun run build` | 一回だけの開発ビルド（vue + esbuild + views/*.ts） |
-| `bun run chk:types` | 型検査のみ（`tsc -p tsconfig.chk.json --noEmit`、src + server）。リリース経路ではこれが唯一の型検査 |
+| `bun run chk:types` | 型検査のみ（`bun check -p tsconfig.chk.json`、src + server + test + tools）。リリース経路ではこれが唯一の型検査 |
 | `bun run lint` | ESLint を**全ファイルへ**（約10秒）。**ESLint 拡張機能は開いているファイルしか見ない**ので、これが無いと閉じたファイルの lint エラーに気づけなかった。`vscode:prepublish` からも呼ぶ |
 | `bun test` | テスト |
 | `bun run version:patch` | package.json のバージョンを上げた後、続けて `release_chk` まで自動で走る（`:minor` / `:major` も同様）。git タグ・コミットは作らない（`-no-git-tag-version` はダッシュ1個だが npm が解釈してくれることを実測確認済み） |
 | `bun run release_chk` | **公開前チェック6項目 ＋ vsix 生成**（[tools/release_chk.ts](../../tools/release_chk.ts)）。`version:patch` 等から自動で呼ばれるので単独で叩く機会は少ない |
 | **`bun run release`** | **GitHub Release の作成**（[tools/release_gh.ts](../../tools/release_gh.ts)）。CHANGELOG からノート本文を生成し、vsix を添えて `gh release create` を呼ぶ。未コミット・未 push なら実行前に止まる |
 | `bun run pack_only` | チェックなしで vsix だけ作る。切り分け・急ぎのとき用 |
-| `bun run update` | 依存の一括更新（本体 + server + グローバルの ncu） |
-| `bun run rebuild` | node_modules 作り直し |
+| `bun run update` | 依存の一括更新（本体 + server + bun のグローバルパッケージ） |
 | `vscode:prepublish` | vsce が自動で呼ぶ。直接叩かない |
 
 ### ⚠️ 落とし穴
@@ -73,7 +72,7 @@
 - どちらも **`publish` という名前は避けている**。`bun publish`（bun 組み込みの npm レジストリ公開）と打ち間違えたときに事故るため
 - `vsce publish` は使わない。PAT を置かない方針（Marketplace への公開は Web UI から手動のまま。GitHub Release は `gh` のローカル認証を使うだけなので、PAT を CI に置く話とは別）
 - `bun run release_chk` が1件でも ✗ を出したら公開しない。✗ の内容は [tools/release_chk.ts](../../tools/release_chk.ts) の該当箇所にコメントで理由が書いてある
-- **ビルドは esbuild なので型を見ない。** 型検査は `vscode:prepublish` の `chk:types`（tsc）が担う。`pack_only` も prepublish 経由なので同じく通る
+- **ビルドは esbuild なので型を見ない。** 型検査は `vscode:prepublish` の `chk:types`（`bun check`）が担う。`pack_only` も prepublish 経由なので同じく通る
 - `dist/` と `views/*.js` は生成物。前者は git 管理下、後者は .gitignore 済み
 
 ### 手順

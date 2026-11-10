@@ -57,7 +57,27 @@ multiroot.md 不具合6件・リソース解放5件、`keywords` の `multi-root
 
 ### ❓ 判断待ち（こちらから確認したいこと）
 
-**現在なし。**
+- 本家→分家（SKYNovel→BlueSNovel）プロジェクト切替の自動化 (2026-11-10)
+	切替作業を拡張機能の機能として提供するかどうか、を判断したい。現状は拡張機能に切替機能が無く**全部手作業**
+	（`updPrjFromTmp` は移行先プロジェクトの `src/web.ts`・`src/renderer/renderer.ts` を上書きしない）。
+	以下は sn_kowloon（本家形式・暗号化あり）を手で移行したときに必要だった項目。
+	⚠️ **パス（`src/web.ts` 等）はすべて移行対象のゲームプロジェクト側のものであり、
+	この sn_extension リポジトリには存在しない**：
+	1. `package.json` の `dependencies`：`@famibee/skynovel_esm` → `@famibee/bluesnovel`
+	2. `package.json` の `repository.url`：`tmp_esm_uc` → `tmp_blues`。`updPrjFromTmp`（ActivityBar.ts）は
+		ここのリポジトリ名で取得元テンプレを決めるので、**直さずにベース更新すると本家テンプレの依存・設定が戻る**
+	3. import 先の書き換え（サブパスはそのまま）：`src/web.ts`（`/web`）・`src/renderer/renderer.ts`（`/app`）・
+		`src/main/main.ts`（`/appMain`）・`src/plugin/*/index.ts`（型 import）。`src/web.ts` の `SysWeb` の
+		import 先は `isBluesPrj()` の判定元でもある＝ここを書き換えた時点で拡張機能からは分家扱いになる。
+		ただし `Project.ts` の `is_blues` は `??=` でキャッシュされるので、切替後はウィンドウ再読み込みが要る
+	4. `SysWeb`/`SysApp` の第2引数：分家の `T_HSysBaseArg` は `dip` が必須。本家時代に暗号化した
+		プロジェクトは `(hPlg, {cur: 'prj/', crypto: true})` のままで型エラーになる（現行の `#tglCryptoMode` は
+		`dip: ''` 付きで書くので、5. の暗号化し直しでも直る）
+	5. 暗号化：本家形式の `doc_crypto/`（画像・音声等を `.bin` 化、`ext_num` で拡張子秘匿）と
+		`snsys_pre`（`getStK` を呼ぶ、`setDecAB` が `{ext_num, ab}` を返す）は分家と非互換で、
+		ブラウザ版が `e.getStK is not a function` で真っ白になる。3. の後に**暗号化を解除→再暗号化**すれば、
+		`is_blues` 分岐（`.bin` 化しない・`snsys_pre_blues` テンプレ）で分家形式に作り直せる。
+		鍵（`pass.json`）は解除しても残るので同じ鍵で作り直される
 
 ⚠️ **判断を仰いだことは、その場で言うだけでなく必ずここへ書く。**
 `.claude/settings.json` の件は口頭で指摘しただけで一覧に入れず、
@@ -90,26 +110,6 @@ multiroot.md 不具合6件・リソース解放5件、`keywords` の `multi-root
 	legacy-app-patch.md の Windows実機検証（stubビルド・asarパス・asar抽出・exe自動起動）が完了。クロスコンパイル環境（mingw-w64/cargo-xwin）は不要と判明(本機にネイティブのrustupツールチェーンあり)。詳細と残件表の更新は blues-sync の `sn-extension-win-legacypatch-verify` ブランチへ、ビルド済みstub本体(x86_64-pc-windows-msvc)は `sn-extension-win-stub-sn_legacy_patch` ブランチへ、それぞれpush済み。（mac側で受領・legacy-app-patch.mdへ統合済み）
 
 	一方、build.md「Windows実機確認が必要な項目」の以下7件はまだ未着手（次のWin側作業機会に着手予定）：Dドライブでの起動／空白入りフォルダ名でのサムネイル・ホバーの`%3A`一致／診断表示位置／`revealFileInOS`・`env.openExternal`／pyftsubsetへの`c:/`パス／タスク実行のシェル連結／マルチルートでのLspWs解放。
-
-- 本家→分家（SKYNovel→BlueSNovel）プロジェクト切替の自動化 (2026-11-10)
-	切替作業を拡張機能の機能として提供するかどうか、を判断したい。現状は拡張機能に切替機能が無く**全部手作業**
-	（`updPrjFromTmp` は `src/web.ts`・`src/renderer/renderer.ts` を上書きしない）。
-	以下は sn_kowloon（本家形式・暗号化あり）を手で移行したときに必要だった項目：
-	1. `package.json` の `dependencies`：`@famibee/skynovel_esm` → `@famibee/bluesnovel`
-	2. `package.json` の `repository.url`：`tmp_esm_uc` → `tmp_blues`。`updPrjFromTmp`（ActivityBar.ts）は
-		ここのリポジトリ名で取得元テンプレを決めるので、**直さずにベース更新すると本家テンプレの依存・設定が戻る**
-	3. import 先の書き換え（サブパスはそのまま）：`src/web.ts`（`/web`）・`src/renderer/renderer.ts`（`/app`）・
-		`src/main/main.ts`（`/appMain`）・`src/plugin/*/index.ts`（型 import）。`src/web.ts` の `SysWeb` の
-		import 先は `isBluesPrj()` の判定元でもある＝ここを書き換えた時点で拡張機能からは分家扱いになる。
-		ただし `Project.ts` の `is_blues` は `??=` でキャッシュされるので、切替後はウィンドウ再読み込みが要る
-	4. `SysWeb`/`SysApp` の第2引数：分家の `T_HSysBaseArg` は `dip` が必須。本家時代に暗号化した
-		プロジェクトは `(hPlg, {cur: 'prj/', crypto: true})` のままで型エラーになる（現行の `#tglCryptoMode` は
-		`dip: ''` 付きで書くので、5. の暗号化し直しでも直る）
-	5. 暗号化：本家形式の `doc_crypto/`（画像・音声等を `.bin` 化、`ext_num` で拡張子秘匿）と
-		`snsys_pre`（`getStK` を呼ぶ、`setDecAB` が `{ext_num, ab}` を返す）は分家と非互換で、
-		ブラウザ版が `e.getStK is not a function` で真っ白になる。3. の後に**暗号化を解除→再暗号化**すれば、
-		`is_blues` 分岐（`.bin` 化しない・`snsys_pre_blues` テンプレ）で分家形式に作り直せる。
-		鍵（`pass.json`）は解除しても残るので同じ鍵で作り直される
 
 ### ✅ 決着した判断（経緯だけ残す）
 

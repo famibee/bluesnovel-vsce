@@ -29,7 +29,7 @@ export type QuickPickItemEx = QuickPickItem & {
 	uri?	: Uri;
 }
 /** SKYNovel プロジェクト用のタグ一覧。プロジェクトを開いていない時に使う */
-export const aPickItems	: QuickPickItemEx[] = [];
+const aPickItems	: QuickPickItemEx[] = [];
 
 /** md.json から取り出した [タグ名, 概要]。#start() で一度だけ埋める */
 let aTagSum: [string, string][] = [];

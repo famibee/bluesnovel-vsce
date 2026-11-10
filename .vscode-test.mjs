@@ -10,6 +10,11 @@
 // 公式が新規拡張機能に推奨するランナー。VSCode の入手・起動・Mocha の面倒を見る。
 // 以前は test/int/runTests.ts で同じことを自作していた（src/docs/testing.md）。
 //
+// ⚠️ package.json の devDependencies にある @vscode/test-electron は自前の
+// import が無いが消さないこと。@vscode/test-cli が実行時に内部で要求する
+// （useInstallation.fromPath 指定時も含む。2026-11-10、消して bun run test:int が
+// 「Error: Can't resolve '@vscode/test-electron'」で落ちることを確認した）
+//
 // TS 側の準備（フィクスチャ生成・実 VSCode の指定・リポジトリ外の user-data-dir・
 // フォーカス対策）は test/prep.ts が持つ。ここはそれを配置するだけ
 

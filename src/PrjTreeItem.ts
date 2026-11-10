@@ -169,16 +169,20 @@ export class PrjTreeItem extends TreeItem {
 	private	static	regCmds(ctx: ExtensionContext, cntVal: string, cfg: TREEITEM_CFG) {
 		if (cfg.cmd === '') return;
 
-		PrjTreeItem.#regCmd(ctx, cntVal, cfg.cmd, cfg);
+		PrjTreeItem.#regCmd(ctx, cntVal, cfg.cmd);
 		if (cfg.exe) {
-			PrjTreeItem.#regCmd(ctx, cntVal +'Dbg', <PrjBtnName>(<string>cfg.cmd +'Dbg'), cfg);
-			PrjTreeItem.#regCmd(ctx, cntVal +'Stop',<PrjBtnName>(<string>cfg.cmd +'Stop'),cfg);
+			PrjTreeItem.#regCmd(ctx, cntVal +'Dbg', <PrjBtnName>(<string>cfg.cmd +'Dbg'));
+			PrjTreeItem.#regCmd(ctx, cntVal +'Stop',<PrjBtnName>(<string>cfg.cmd +'Stop'));
 		}
 	}
-	static	#regCmd(ctx: ExtensionContext, cntVal: string, btn_nm2: PrjBtnName, cfg: TREEITEM_CFG) {
+	static	#regCmd(ctx: ExtensionContext, cntVal: string, btn_nm2: PrjBtnName) {
+		// ⚠️ cfg は登録時のものを掴まず、押された項目（ti）のものを使う。
+		// コマンド登録は最初のプロジェクトで一度きり（create() が regCmds を
+		// 空にする）なので、掴むと2つ目以降のプロジェクトでも最初のプロジェクトの
+		// npm コマンド（旧テンプレ/新テンプレで異なる）が走ってしまう
 		ctx.subscriptions.push(commands.registerCommand(
 			cntVal,
-			(ti: PrjTreeItem)=> PrjTreeItem.#hPathWs2onBtn[ti.pathWs]?.(ti, btn_nm2, cfg),
+			(ti: PrjTreeItem)=> PrjTreeItem.#hPathWs2onBtn[ti.pathWs]?.(ti, btn_nm2, ti.cfg),
 		));
 	}
 

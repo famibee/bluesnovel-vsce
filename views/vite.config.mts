@@ -32,7 +32,6 @@ export default defineConfig({
 		entries: ['setting.html'],
 		include: [
 			'lib/bootstrap.bundle.min.js',
-			'lib/fontawesome/all.min.js',
 		],
 	},
 //	assetsInclude: ['./lib/**/*.woff2'],

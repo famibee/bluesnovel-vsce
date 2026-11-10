@@ -14,6 +14,7 @@
 | [file-watch.md](file-watch.md) | ファイル監視の設計 |
 | [testing.md](testing.md) | テスト基盤（統合テスト・UIテスト） |
 | [release.md](release.md) | 公開前チェック・リリース手順・移行案内原稿 |
+| [legacy-app-patch.md](legacy-app-patch.md) | 過去アプリ向けパッチ配布（`patch_app/`・`patch_gen_gui/`）の設計と引き継ぎ |
 
 ⚠️ **決着・凍結した判断は対応するソースコードのコメントへ移してある**
 （重複を避けるため）。ここにあるのは対応コードが無い判断・未着手の宿題・

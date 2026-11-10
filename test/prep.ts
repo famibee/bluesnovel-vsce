@@ -23,7 +23,10 @@ import {hideSoon} from './hideWin';
 
 /** 既にある VSCode を使う（無ければ undefined → test-cli が自動ダウンロード） */
 const A_VSC = [
-	'/Applications/Visual Studio Code.app/Contents/MacOS/Electron',
+	// ⚠️ mac版の実行バイナリ名は 'Electron' ではなく 'Code'
+	// （2026-11-10 発覚：ずっと存在しないパスだったため常に自動ダウンロードに
+	// フォールバックしており、.vscode-test/ に版違いが5つ・約4.7GB積もっていた）
+	'/Applications/Visual Studio Code.app/Contents/MacOS/Code',
 	'C:/Program Files/Microsoft VS Code/Code.exe',
 	'/usr/share/code/code',
 ];
