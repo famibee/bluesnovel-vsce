@@ -1,0 +1,48 @@
+/* 設定画面の CSS。Bootstrap は使わず、VSCode のテーマ変数だけで書く
+	（Theme Color: https://code.visualstudio.com/api/references/theme-color ）。
+	var() の第二引数は、setting.htm をブラウザで直接開いたとき用の既定値 */
+
+body {
+	margin: 0;
+	padding: 0 1rem 1rem;
+	color: var(--vscode-editor-foreground, #d4d4d4);
+	background-color: var(--vscode-editor-background, #1e1e1e);
+	font-size: var(--vscode-editor-font-size, 13px);
+	font-weight: var(--vscode-editor-font-weight, normal);
+	font-family: var(--vscode-editor-font-family, sans-serif);
+	user-select: none;
+}
+
+/* タブ */
+.stg-tabs {
+	display: flex;
+	flex-wrap: wrap;
+	border-bottom: 1px solid var(--vscode-tab-border, #252526);
+}
+.stg-tabs > button {
+	padding: .5rem 1rem;
+	font: inherit;
+	color: var(--vscode-tab-inactiveForeground, #969696);
+	background-color: var(--vscode-tab-inactiveBackground, #2d2d2d);
+	border: none;
+	border-bottom: 2px solid transparent;
+	cursor: pointer;
+}
+.stg-tabs > button:hover,
+.stg-tabs > button:focus-visible {
+	color: var(--vscode-tab-activeForeground, #fff);
+	background-color: var(--vscode-tab-hoverBackground, #2d2d2d);
+}
+.stg-tabs > button.active {
+	color: var(--vscode-tab-activeForeground, #fff);
+	background-color: var(--vscode-tab-activeBackground, #1e1e1e);
+	border-bottom-color: var(--vscode-tab-activeBorderTop, var(--vscode-focusBorder, #0e639c));
+}
+
+.stg-pane {
+	display: none;
+	padding-top: .5rem;
+}
+.stg-pane.active {
+	display: block;
+}

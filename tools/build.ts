@@ -114,6 +114,27 @@ const oBuild: BuildOptions = {
 	}
 }
 
+{	// === 設定画面（Preact）===
+	// views/stg/setting.tsx → views/setting.js・views/setting.css。
+	// 上の素のスクリプトと分けているのは、JSX の設定が要るのと、エントリを
+	// 混ぜると出力先が views/stg/setting.js にずれるため
+	const ctx = await context({
+		...oBuild,
+		entryPoints	: {setting: './views/stg/setting.tsx'},
+		outdir		: 'views',
+		platform	: 'browser',
+		format		: 'iife',
+		sourcemap	: false,	// webview で配信するので付けない
+		jsx			: 'automatic',
+		jsxImportSource	: 'preact',
+		alias		: {react: 'preact/compat'},	// zustand が react を import する
+	});
+	if (watch) await ctx.watch(); else {
+		await ctx.rebuild();
+		await ctx.dispose();
+	}
+}
+
 {	// === batch ===
 	const ctx = await context({
 		...oBuild,

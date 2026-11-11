@@ -64,14 +64,9 @@ export class WfbSettingSn extends WatchFile {
 	get is体験版() {return this.#is体験版}
 
 
-	#preventUpdHowl = true;	// 更新ハウリングを防ぐ
-		// ついでに初回の不要な 'update.aTemp' を止めるため true 始まりで
-
 	//MARK: 重複チェック
 	chkMultiMatch = ()=> { /* empty */ };
 	#chkMultiMatch_proc() {
-		this.#preventUpdHowl = true;
-
 		const aTemp	: T_TEMP[]	= [];
 
 		const src = readFileSync(this.#fnSetting, {encoding: 'utf8'});
@@ -122,10 +117,9 @@ export class WfbSettingSn extends WatchFile {
 	//MARK: 更新
 	update = (_e: T_V2E_aTemp)=> { /* empty */ };
 	#update_proc(e: T_V2E_aTemp) {
-		if (this.#preventUpdHowl) {
-			this.#preventUpdHowl = false;
-			return;
-		}
+		// ⚠️ 設定画面は「利用者が操作したとき」しか送ってこない（views/stg/store.ts）。
+		// 以前はこちらが送った 'update.aTemp' を画面がそのまま送り返してきたので、
+		// 一回分を捨てるフラグがあった。いま同じことをすると最初の編集が消える
 
 		if (this.#tiDelay) clearTimeout(this.#tiDelay);	// 遅延
 		this.#tiDelay = setTimeout(()=> {

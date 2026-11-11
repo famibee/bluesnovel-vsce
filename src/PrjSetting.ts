@@ -90,7 +90,7 @@ export class PrjSetting implements Disposable {
 		this.#setEscape = ()=> reqPrj2LSP({cmd: 'need_go'});
 
 		const path_ext = this.pc.ctx.extensionPath;
-		const path_vue_root = path_ext +'/dist/';
+		const path_vue_root = path_ext +'/views/';
 		this.#uriRes = Uri.file(path_vue_root);
 		void Promise.allSettled([
 			()=> Promise.try(()=> {
@@ -101,11 +101,10 @@ export class PrjSetting implements Disposable {
 			// 設定画面
 			async ()=> {
 				this.#htmSrc = (await readFile(
-					path_vue_root +'setting.html', {encoding: 'utf8'}
+					path_vue_root +'setting.htm', {encoding: 'utf8'}
 				))
 				.replace('<meta_autooff ', '<meta ')// ローカルデバッグしたいので
-				.replaceAll('${nonce}', getNonce())
-				.replace('.ts"></script>', '.js"></script>');
+				.replaceAll('${nonce}', getNonce());
 
 				// テンプレのままなら変更をうながすため設定画面を開く
 				if (this.#setTmp_save_ns.has(cfg.oCfg.save_ns)) this.open();

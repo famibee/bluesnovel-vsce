@@ -124,7 +124,8 @@ const A_REJECT_OWN = [
 ];
 const A_NEED_FILE = [
 	'package.json', 'README.md', 'CHANGELOG.md', 'LICENSE',
-	'dist/extension.js', 'dist/LangSrv.js', 'dist/md.json', 'dist/setting.html',
+	'dist/extension.js', 'dist/LangSrv.js', 'dist/md.json',
+	'views/setting.htm', 'views/setting.js', 'views/setting.css',	// 設定画面
 	// views/*.ts から生成する webview スクリプト（ビルド忘れの検出）。
 	// score.js は CteScore（SKYNovel.score）凍結中のため対象外（2026-10-22）
 	'views/folder.js', 'views/tmpwiz.js', 'views/toolbox.js',

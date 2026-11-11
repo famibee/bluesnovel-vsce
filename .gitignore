@@ -7,6 +7,8 @@ dist/*.tsbuildinfo
 /views/folder.js
 /views/tmpwiz.js
 /views/toolbox.js
+/views/setting.js
+/views/setting.css
 /views/score.js
 
 /node_modules/

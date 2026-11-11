@@ -10,6 +10,9 @@ views/test/
 **/*.d.ts
 **/*.map
 **/*.ts
+**/*.tsx
+views/stg/
+	# 設定画面のソース。同梱するのは生成物の views/setting.js・setting.css
 **/*.mts
 	# views/vite.config.mts（**/*.ts には一致しない）
 **/*.vue

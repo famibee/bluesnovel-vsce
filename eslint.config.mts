@@ -21,6 +21,7 @@ export default defineConfig([
 		'views/tmpwiz.js',
 		'views/toolbox.js',
 		'views/score.js',
+		'views/setting.js',	// build.ts が views/stg/setting.tsx から生成する
 		'test/int/suite.js',	// ここから3つは build.ts が .ts から生成する
 		'test/int/multi.js',
 		'test/ui/runUI.mjs',	// 同上（UI テストは node で走らせる）
@@ -163,6 +164,13 @@ export default defineConfig([
 			globals: {
 				window	: true
 			},
+		},
+	},
+	{
+		name: '設定画面（Preact。ブラウザ環境）',
+		files: ['views/stg/*.{ts,tsx}'],
+		languageOptions: {
+			globals: {...globals.browser},
 		},
 	},
 	{

@@ -26,7 +26,8 @@
 		"removeComments": true,
 		//emitDecoratorMetadata		// 出力 js に型を発行
 
-		"jsx": "preserve",
+		"jsx": "react-jsx",
+		"jsxImportSource": "preact",	// views/stg/*.tsx（設定画面）
 		"useDefineForClassFields": true,	// "本来あるべき"コードが生成されるように（今後デフォルトtrueになる予定）
 
 

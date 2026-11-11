@@ -39,7 +39,7 @@ multiroot.md 不具合6件・リソース解放5件、`keywords` の `multi-root
 
 | # | 内容 | 節 |
 |---|---|---|
-| 1 | 設定パネルを Vue から Preact へ載せ替え（2026-11-11 確定。React 方針は撤回） | 本ファイル「設定パネルの Preact 載せ替え」 |
+| 1 | 設定パネルを Vue から Preact へ載せ替え（土台まで済み。残りはタブの中身・CSS・Vue の撤去） | 本ファイル「設定パネルの Preact 載せ替え」 |
 
 ### 前提が揃うまで着手できない
 
@@ -102,19 +102,57 @@ multiroot.md 不具合6件・リソース解放5件、`keywords` の `multi-root
 
 ⚠️ ボタンが扱うのはビルド構成だけ。スクリプトのタグやプラグインが BlueSNovel で動くかは別問題
 
-## 設定パネルの Preact 載せ替え【確定・未着手・2026-11-11】
+## 設定パネルの Preact 載せ替え【作業中・2026-11-11 に土台まで】
 
-- 対象は `views/vue` 8ファイル＋ `views/store` 5ファイル、合計約1150行
-- vee-validate・yup・pinia を外し、バリデーションは手書きにする
-- **Bootstrap も同時に外し**、VSCode のテーマ変数を使った手書き CSS に置き換える（2026-11-11 決定）。
-	外すのは `views/setting.html` からの参照だけ。`views/lib` の `bootstrap.*`・`bootstrap2vscode.css` は
-	envinfo・folder・score・tmpwiz・toolbox の5画面がまだ使っているので**ファイルは消さない**。
-	見た目の作り直しになるので `test:ui` と目視で確認する
-- 選定理由：BlueSNovel エンジンは React 19 + zustand。Preact なら hooks/JSX の書き方が BlueSNovel と揃い、ランタイムが小さい。
-	Svelte は BlueSNovel と別の流儀が増える。Alpine.js は型検査が効かない
-- 2026-11-11 時点のビルド成果物は `setting.js` 279KB・`setting.css` 236KB（CSS は Bootstrap）
-- ⚠️ BlueSNovel エンジンへ渡すデバッグ用コンポーネント（文字レイヤ・画像レイヤとして使う構想）は、
-	BlueSNovel の React ツリーに載る以上 React コンポーネントである必要がある。hooks だけで書いておけば同じソースを React 向けにもビルドできる
+**いまの状態**：設定パネルは新しい `views/setting.htm`（Preact）を読んでいて、**タブだけ出て中身は空**。
+このため `test:ui` は 30 件中 4 件（スライダー・必須項目の検証 × 2 プロジェクト）が落ちる。下の 1 が済めば通る。
+Vue 版のファイルと依存はまだ残っている（どこからも読まれない）。
+
+### 決めたこと
+
+- ビルドは esbuild（`tools/build.ts` の「設定画面（Preact）」）。`views/stg/setting.tsx` → `views/setting.js`・`views/setting.css`。Vite は撤去する
+- 状態は zustand のストア1つ（`views/stg/store.ts`）。esbuild の `alias` で `react` → `preact/compat`
+- **本体へ送るのは利用者が操作したときだけ**。受信はストアに入れるだけで送り返さない（`store.ts` 冒頭）。
+	これに合わせて `WfbSettingSn.ts` のエコー抑止フラグは外した
+- 不正な数値（空欄・小数）は本体へ送らない。数値欄は部品側で入力中の文字列を持ち、検証を通ったときだけ `patchCfg()` を呼ぶ。
+	文字列項目は検証エラーでも送る（テンプレ既定値のままでも保存できる必要がある）
+- Bootstrap は使わない。`views/stg/setting.css` に VSCode のテーマ変数で書く。`views/lib/bootstrap2vscode.css` は
+	他の5画面用なのでリンクしない（変数名は `--vscode-tab-inactiveForeground` のように元の大文字小文字のまま。
+	`bootstrap2vscode.css` のケバブ表記は効いていない）
+- 通信の型（`T_E2V`・`T_V2E`）は変えない
+
+### 残作業（この順で）
+
+1. **タブの中身を1つずつ**：デバッグ → パッケージ → 音声最適化 → 画像最適化 → テンプレ → 基本情報・アプリ。
+	`views/stg/Stg*.tsx` を作り、`App.tsx` の `A_TAB` の `cmp` に入れる。元は `views/vue/Stg*.vue`
+	- 共通部品は `parts.tsx`、検証は `validate.ts`（DOM に触らない純関数。文言は Vue 版のまま）
+	- `test:ui` が見ているもの：`#app`、`#nav-{id}-tab`・`#nav-{id}` と class `active`、
+		`id="cnv.mat.webp_quality"`（`fill('45')`＋`change` の後も 45）、基本情報タブの「必須入力項目です」
+	- range は `onInput` で `setWss()`、`onChange`（Preact ではネイティブの change＝離したとき）で `sendPicQDef()`・`sendPicQ()`
+	- range・ラジオの値は `Number()` で入れる。`cnv.icon.shape` が数値で届いても受け手
+		（`WfbOptPic.ts` の `shape` の先）が動くか確かめる（Vue 版は文字列を送っていた）
+	- 画像最適化：Bootstrap の collapse は無いので、開いている行の名前を1つ持ち、その行だけ比較スライダーを描く。
+		画像 URL には `picRev` を付ける（描画のたびに時刻を付けない）
+	- 比較スライダーは `img-comparison-slider`（Web Component）を直接使う。直接の依存に足し、
+		`setting.tsx` で本体と `dist/styles.css` を import、JSX 用の型宣言を `views/stg/env.d.ts` に足す
+	- Vue 版の不具合は写さない：フォント表の Open ボタンの id 重複、「暗号化しないフォルダ」のラベルの `for` 抜け、
+		背景色の検証 `/#\d{6}/`（a〜f を弾く）
+2. **CSS**：ライト・ダーク・ハイコントラストで目視
+3. **撤去**：`views/vue/`・`views/store/`・`views/setting.html`・`views/setting.ts`・`views/vite.config.mts`・`views/@types/env.d.ts`、
+	依存 `vue`・`pinia`・`vee-validate`・`yup`・`@img-comparison-slider/vue`・`@vitejs/plugin-vue`・`vite`、
+	スクリプト `vue_bld`・`vue_bw` と `build`・`watch`・`vscode:prepublish` からの呼び出し、
+	`types.ts` の `T_E2V_INITVUE` と `store.ts` の `case 'init.Vue'`
+4. **周辺の追従**：`.vscodeignore` の Vue・`setting.html` の行、`eslint.config.mts` の「vue の store のみ」、
+	`tsconfig.json` の `noUnusedParameters` の注記、`tsconfig.chk.json` に `views/` 全体を入れられるか、
+	`tools/build.ts` の Vite のコメントアウト跡、`test/ui/runUI.ts` のコメントの「Vue」、
+	[features.md](features.md) の「Vue のままでよい」、[release.md](release.md) のビルド説明、CHANGELOG
+5. **確認**：`chk:types`・`lint`・`test:ui`・`release_chk`、実機で各タブの保存とスイッチの取り消し
+
+### 未確認
+
+- ストアの受信（`store.ts` の `recv()`）は型検査だけで、実画面では試せていない（表示するタブがまだ無い）。1 の最初のタブで確かめる
+- ⚠️ BlueSNovel エンジンへ渡すデバッグ用コンポーネント（文字レイヤ・画像レイヤとして使う構想）は React コンポーネントである必要がある。
+	hooks だけで書けば同じソースを React 向けにもビルドできるが、`onChange` の意味が Preact と React で違う点に注意
 
 ---
 
