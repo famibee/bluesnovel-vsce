@@ -223,6 +223,14 @@
 				}
 			},
 			{
+				"command": "skynovel.devSwitchEngine",
+				"title": "Switch engine (SKYNovel ⇔ BlueSNovel)",
+				"icon": {
+					"light": "res/light/refresh.svg",
+					"dark": "res/dark/refresh.svg"
+				}
+			},
+			{
 				"command": "skynovel.devTaskWeb",
 				"title": "npm web (on Browser)",
 				"icon": {
@@ -532,6 +540,11 @@
 				},
 				{
 					"group": "inline",
+					"command": "skynovel.devSwitchEngine",
+					"when": "view == skynovel-ws && viewItem == 'skynovel.devSwitchEngine'"
+				},
+				{
+					"group": "inline",
 					"command": "skynovel.devTaskWeb",
 					"when": "view == skynovel-ws && viewItem == 'skynovel.devTaskWeb'"
 				},
@@ -764,8 +777,6 @@
 		"yup": "^1.7.1"
 	},
 	"devDependencies": {
-		"7zip-bin": "^5.2.0",
-		"@electron/asar": "^4.3.1",
 		"@eslint/js": "10.0.1",
 		"@nut-tree-fork/nut-js": "^4.2.6",
 		"@types/archiver": "^8.0.0",

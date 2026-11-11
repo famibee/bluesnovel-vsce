@@ -138,6 +138,7 @@ export class PrjSetting implements Disposable {
 	}
 	readonly	#setTmp_save_ns	= new Set([
 		'tmp_esm_uc',
+		'tmp_blues',
 		'tmp_cjs_sample',
 		'tmp_cjs_hatsune',
 		'tmp_cjs_uc',
@@ -155,11 +156,13 @@ export class PrjSetting implements Disposable {
 
 	get is体験版() {return this.#stgSn.is体験版}
 
-	getLocalSNVer(): T_LocalSNVer {
+	getLocalSNVer(isBlues: boolean): T_LocalSNVer {
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 		const oPkg = readJsonSync(this.#PATH_PKG_JSON, {encoding: 'utf8'});
 		const fnCngLog = this.pc.PATH_WS +'/CHANGELOG.md';
-		const lib_name = `@famibee/skynovel${this.pc.IS_NEW_TMP ?'_esm': ''}`;
+		const lib_name = this.pc.IS_NEW_TMP
+			? `@famibee/${isBlues ?'bluesnovel' :'skynovel_esm'}`
+			: '@famibee/skynovel';
 		const ver_temp = existsSync(fnCngLog)
 			? /\n## v(.+)\s/.exec(
 				readFileSync(fnCngLog, {encoding: 'utf8'})
@@ -169,6 +172,7 @@ export class PrjSetting implements Disposable {
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
 			ver_sn	: oPkg.dependencies?.[lib_name]?.slice(1) ?? '',
 			is_new_tmp	: this.pc.IS_NEW_TMP,
+			is_blues	: isBlues,
 			ver_temp,
 		};
 	}

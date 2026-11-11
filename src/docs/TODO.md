@@ -39,9 +39,8 @@ multiroot.md 不具合6件・リソース解放5件、`keywords` の `multi-root
 
 | # | 内容 | 節 |
 |---|---|---|
-| 1 | 本家⇔分家（SKYNovel⇔BlueSNovel）ワンタッチ切替ボタンの実装（2026-11-11 実装すると決定・設計済み） | 本ファイル「本家⇔分家 切替ボタン」 |
-| 2 | パッチ生成ツールの環境・コード削除（2026-11-11 廃止決定。過去ソースは GitHub に残る） | 本ファイル「パッチ生成ツールの削除範囲」 |
-| 3 | 設定パネルを Vue から Preact へ載せ替え（2026-11-11 確定。React 方針は撤回） | 本ファイル「設定パネルの Preact 載せ替え」 |
+| 1 | 本家⇔分家（SKYNovel⇔BlueSNovel）ワンタッチ切替ボタン（2026-11-11 実装済み。**動作確認が未実施**） | 本ファイル「本家⇔分家 切替ボタン」 |
+| 2 | 設定パネルを Vue から Preact へ載せ替え（2026-11-11 確定。React 方針は撤回） | 本ファイル「設定パネルの Preact 載せ替え」 |
 
 ### 前提が揃うまで着手できない
 
@@ -73,48 +72,21 @@ multiroot.md 不具合6件・リソース解放5件、`keywords` の `multi-root
 - Win側からの報告 (2026-09-17)
 	build.md「Windows実機確認が必要な項目」の以下7件はまだ未着手（次のWin側作業機会に着手予定）：Dドライブでの起動／空白入りフォルダ名でのサムネイル・ホバーの`%3A`一致／診断表示位置／`revealFileInOS`・`env.openExternal`／pyftsubsetへの`c:/`パス／タスク実行のシェル連結／マルチルートでのLspWs解放。
 
-## 本家⇔分家 切替ボタン【設計済み・未実装・2026-11-11】
+## 本家⇔分家 切替ボタン【実装済み・動作確認が未実施・2026-11-11】
 
-ESM テンプレ（`IS_NEW_TMP`）のプロジェクトだけが対象。cjs テンプレには分家が無いのでボタンを出さない。
-⚠️ **以下のパス（`src/web.ts` 等）は移行対象のゲームプロジェクト側のもので、この sn_extension リポジトリには存在しない。**
+`Project.ts` の `#switchEngine()`。ESM テンプレ（`IS_NEW_TMP`）のプロジェクトだけが対象（cjs テンプレは
+`PrjTreeItem.ts` の `hide` でボタン自体を出さない）。処理順・正規表現の中身はコードのコメント参照。
+あわせて、エンジンを決め打っていた4箇所（`ActivityBar.ts` の `updPrjFromTmp`・`chkLastSNVer`、
+`PrjSetting.ts` の `getLocalSNVer`・`#setTmp_save_ns`）も直した。
 
-### 処理順（`Project.ts` に `#switchEngine()` を新設。逆方向は置換の向きが逆になるだけ）
+- `#switchMainTs()` の正規表現は、tmp_esm_uc と tmp_blues の `src/main/main.ts` を実際に diff して作った。
+	2026-11-11、その正規表現を両テンプレの実ファイルに適用し、双方向とも意図通りに変換できることを
+	スクリプトで確認済み（残る差分は無関係な2箇所＝開発時のセキュリティ警告抑制行・コピーライト年だけで、
+	これらは元々このボタンの対象外）
+- **残る動作確認（未実施）**：GitHub から取得した tmp_blues 単体で、実際に VSCode から
+	ボタンを押して `web` タスクをブラウザで動かす一連の手順。手順は以下のまま
 
-1. 確認ダイアログ（modal）。git の未コミット変更があれば警告する（巻き戻し手段は git）。`#termDbgSS()` で実行中のものを止める
-2. 暗号化中なら `#tglCryptoMode()` で解除し、暗号化していたことを覚えておく
-	（`doc_crypto/`・`snsys_pre` プラグインが消え、`SysWeb`/`SysApp` の引数が `(hPlg)` に戻る）
-3. `package.json`：`dependencies` のキーを `@famibee/skynovel_esm` ⇔ `@famibee/bluesnovel` に付け替え、
-	`repository.url` を `tmp_esm_uc` ⇔ `tmp_blues` に書き換える
-4. import 先の書き換え：`src/**/*.ts` と `vite*.config.ts` の `@famibee/skynovel_esm` ⇔ `@famibee/bluesnovel`
-	（サブパス `/web`・`/app`・`/appMain` はそのまま）
-5. `src/main/main.ts` の構造差分を当てる（2026-11-11 に tmp_esm_uc と tmp_blues を diff して確認）。
-	分家はパッケージ版で `file://` の `fetch()` が使えないため、カスタムスキームで開く：
-	- `appMain` を静的 import にし、トップレベルで `appMain.registerScheme()` を呼ぶ
-	- `const {appMain} = await import('…/appMain')` の位置に `appMain.handleScheme(resolve(__dirname, '../renderer'))`
-	- `w.loadFile(resolve(__dirname, '../renderer/index.html'))` → `w.loadURL('app://bundle/index.html')`
-
-	**該当箇所だけを正規表現で置換する**（2026-11-11 決定。メニュー等の利用者の改変を残すため、テンプレ版での上書きはしない）。
-	パターンが一致しなければ書き換えず、手作業が必要な旨を警告する（ブラウザ実行には影響しない。影響するのはパッケージ版アプリだけ）
-6. `actBar.updPrjFromTmp()` を呼び、切替先テンプレの依存・scripts・`vite.electron.config.ts` を取り込む
-	（3. で `repository.url` を直してあるので切替先テンプレから取得される）。続けて `SnUpd_waited` のタスクでインストール
-7. キャッシュの破棄：`Project.#is_blues` を undefined に戻し、`skynovel.isBlues` コンテキストを更新する。
-	`HDiff` はコンストラクタで `isBlues` を受け取って保持しているので、取得関数を渡す形に変える
-8. 2. で暗号化していたなら `#tglCryptoMode()` で再暗号化する（鍵 `pass.json` は解除しても残る）。
-	分家なら `.bin` 化なし・`snsys_pre_blues` テンプレ・`dip: ''` 付きで作り直される
-9. ウィンドウ再読み込みを促す（LSP は `ready` の `is_blues` で辞書を差し替えるだけで、戻す経路が無い）
-
-### あわせて直す、拡張機能側の本家決め打ち
-
-- `ActivityBar.ts` `updPrjFromTmp`：`lib_name` が `@famibee/skynovel(_esm)` 固定。分家ではローカル参照の引き継ぎが効かない。
-	また `v?.startsWith('ile:')` は `slice(1)` していない値に対する判定なので `file:` に一致しない
-- `PrjSetting.ts` `getLocalSNVer`：同じく `lib_name` 固定で、分家プロジェクトは `ver_sn` が空になる
-- `ActivityBar.ts` `chkLastSNVer`：取得するのは skynovel_esm・tmp_esm_uc・SKYNovel・tmp_cjs_uc だけ。
-	分家プロジェクトのテンプレ版を tmp_esm_uc の版と比べてしまう。bluesnovel・tmp_blues の取得と `T_LocalSNVer` への `is_blues` 追加が要る
-- `PrjSetting.ts` `#setTmp_save_ns` に `tmp_blues` が無い
-
-### 動作確認（実装後）
-
-対象は **GitHub から取得した tmp_blues 単体**（2026-11-11 決定。sn_osk_gitayu は使わない）。
+対象は **GitHub から取得した tmp_blues 単体**（sn_osk_gitayu は使わない）。
 ローカルの `../tmp_blues` は依存が `../bluesnovel/` のローカル参照なので使わず、作業用フォルダへ取得し直す。
 
 1. まず**暗号化なし**で `web` タスクを実行し、ブラウザでコンソールにエラーが無いこと・冒頭から数行進められることを確認する
@@ -136,19 +108,6 @@ ESM テンプレ（`IS_NEW_TMP`）のプロジェクトだけが対象。cjs テ
 - 2026-11-11 時点のビルド成果物は `setting.js` 279KB・`setting.css` 236KB（CSS は Bootstrap）
 - ⚠️ 分家エンジンへ渡すデバッグ用コンポーネント（文字レイヤ・画像レイヤとして使う構想）は、
 	分家の React ツリーに載る以上 React コンポーネントである必要がある。hooks だけで書いておけば同じソースを React 向けにもビルドできる
-
-## パッチ生成ツールの削除範囲【未実施・2026-11-11】
-
-- フォルダ：`patch_app/`・`patch_gen_gui/`・`.claude/skills/patch-gen-gui-dev/`
-- ソース：`src/genLegacyPatch.ts`・`src/InstallerExtract.ts`・`src/probeInstaller.ts`・`src/LegacyAppCheck.ts`・`src/DownloadUrlCheck.ts`
-- テスト：`test/LegacyAppCheck.test.ts`・`test/InstallerExtract.test.ts`・`test/DownloadUrlCheck.test.ts`
-- 設定：`.gitignore` の Rust 節、`.vscodeignore` の `patch_app/`・`patch_gen_gui/` と説明コメント
-- 依存：`7zip-bin`・`@electron/asar` は、他に使用箇所が無いことを確かめてから外す
-- 文書：`legacy-app-patch.md`、README.md の索引行、features.md の「過去アプリ向けパッチ配布」の項
-- 環境：`~/.cargo/registry`（2026-11-11 時点で 1.1GB）と rustup ツールチェーンを削除する（2026-11-11 決定）
-- ブランチ：ローカルの `sn-extension-mac-legacypatch-multi`、blues-sync の `sn-extension-win-legacypatch-verify`・`sn-extension-win-stub-sn_legacy_patch` を削除する（2026-11-11 決定）。
-	**origin の `sn-extension-mac-legacypatch-multi` は残す**（過去ソースの保管先）
-- 残す：`src/genUpdUrl.ts`（`update_check` の URL 差し替え用で、パッチ生成ツールとは別機能）
 
 ---
 

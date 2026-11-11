@@ -20,6 +20,8 @@ export type PrjBtnName =
 	'PrjSet'|
 	'Crypto'|
 	'Crypto_waited'|
+	'SwitchEngine'|
+	'SwitchEngine_waited'|
 	'TaskWeb'|
 	'TaskWebDbg'|
 	'TaskWebStop'|
@@ -46,6 +48,8 @@ export type TREEITEM_CFG = {
 	npm?	: string,
 	children?	: TREEITEM_CFG[],
 	forMac?		: boolean,
+	hide?		: boolean,	// ボタンを隠す（コマンド自体は常に登録する。multi-rootでプロジェクトごとに
+							// 出し分けると、最初に開いたプロジェクトで登録が決まる既存の仕組みと噛み合わない）
 }
 
 type ON_BTN = (ti: TreeItem, btn_nm: PrjBtnName, cfg: TREEITEM_CFG)=> void;
@@ -59,6 +63,7 @@ export const enum eDevTreeView {
 	ReBuild,
 	PrjSet,
 	Crypto,
+	SwitchEngine,
 	TaskWeb,
 	TaskApp,
 	Pack,
@@ -101,6 +106,9 @@ export class PrjTreeItem extends TreeItem {
 				{cmd: 'Crypto',		icon: 'gear',	label: '暗号化',task_type: 'Sys', npm: is_new_tmp
 					? 'echo "Crypto"'
 					: 'npm run webpack:dev'},
+				{cmd: 'SwitchEngine',	icon: 'skynovel',	label: '本家⇔分家 切替',
+					task_type: 'Sys', npm: 'npm i',
+					hide: ! is_new_tmp},	// cjsテンプレには分家が無い
 				{cmd: 'TaskWeb',	icon: 'browser',	label: '起動：ブラウザ版',
 					task_type: 'Web',npm: 'npm run web',	exe: true,},
 				{cmd: 'TaskApp',	icon: 'electron',	label: '起動：アプリ版',
@@ -144,16 +152,20 @@ export class PrjTreeItem extends TreeItem {
 
 	#children	: TreeItem[]	= [];
 	private	constructor(readonly ctx: ExtensionContext, readonly pathWs: FULL_PATH, readonly cfg: TREEITEM_CFG) {
-		super(is_win && cfg.forMac ?'' :cfg.label);
+		const forMacHidden = is_win && cfg.forMac;
+		super(forMacHidden || cfg.hide ?'' :cfg.label);
 
-		if (is_win && cfg.forMac) this.description = '（Windowsでは使えません）';
-		else {
-			this.description = cfg.desc ?? '';
+		if (forMacHidden) this.description = '（Windowsでは使えません）';
+		else if (! cfg.hide) this.description = cfg.desc ?? '';
 
-			if (cfg.cmd) {
-				const cntVal = this.contextValue = 'skynovel.dev'+ <string>cfg.cmd;
-				PrjTreeItem.regCmds(ctx, cntVal, cfg);
-			}
+		if (cfg.cmd) {
+			const cntVal = 'skynovel.dev'+ <string>cfg.cmd;
+			// ⚠️ 登録は hide（forMac含む）の有無に関わらず常に行う。multi-root で
+			// 最初に開いたプロジェクトが hide=true（例：cjsテンプレ）だと、
+			// regCmds が以降no-opになり（下記）、hide=falseな別プロジェクトが
+			// 後から開かれてもコマンドが永久に登録されない
+			PrjTreeItem.regCmds(ctx, cntVal, cfg);
+			if (! forMacHidden && ! cfg.hide) this.contextValue = cntVal;
 		}
 
 		if (cfg.children) {

@@ -95,6 +95,10 @@ export	type T_PKG_JSON = {
 	scripts: {
 		[scr_nm: string]: string
 	}
+	repository?: {
+		type	: string
+		url		: string
+	}
 	build: {
 		appId		: string
 		productName	: string

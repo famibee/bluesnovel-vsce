@@ -89,8 +89,10 @@ type T_H_ENV = {
 	BUN				: T_ENV;
 	SN_ESM_VER		: T_ENV;
 	SN_CJS_VER		: T_ENV;
+	SN_BLUES_VER	: T_ENV;
 	TEMP_ESM_VER	: T_ENV;
 	TEMP_CJS_VER	: T_ENV;
+	TEMP_BLUES_VER	: T_ENV;
 	PY_FONTTOOLS	: T_ENV;
 }
 
@@ -118,6 +120,10 @@ export class ActivityBar implements TreeDataProvider<TreeItem> {
 					icon: 'skynovel',		label: '(web) SKYNovel'},
 				{nm: 'TEMP_CJS_VER',
 					icon: 'skynovel',		label: '(web) テンプレ'},
+				{nm: 'SN_BLUES_VER',
+					icon: 'skynovel',		label: '(web) BlueSNovel'},
+				{nm: 'TEMP_BLUES_VER',
+					icon: 'skynovel',		label: '(web) テンプレ blues'},
 				{nm: 'PY_FONTTOOLS',
 					icon: 'python-brands',	label: 'fonttools'},
 			])
@@ -512,8 +518,10 @@ ${is_win ?'\n実行後、pyftsubset を見つけられるよう VSCode ターミ
 	async chkLastSNVer(aLocalSNVer: T_LocalSNVer[]) {
 		let newVerEsmSN = '';
 		let newVerCjsSN = '';
+		let newVerBluesSN = '';
 		let newVerEsmTemp = '';
 		let newVerCjsTemp = '';
+		let newVerBluesTemp = '';
 		await Promise.allSettled([
 			fetch('https://raw.githubusercontent.com/famibee/skynovel_esm/main/package.json')
 			.then(async res=> {
@@ -554,11 +562,31 @@ ${is_win ?'\n実行後、pyftsubset を見つけられるよう VSCode ターミ
 				tiSV.description = '-- ' + newVerCjsTemp;
 				ActivityBar.#actBar.#onDidChangeTreeData.fire(tiSV);
 			}),
+
+			fetch('https://raw.githubusercontent.com/famibee/bluesnovel/main/package.json')
+			.then(async res=> {
+				const json = <{version: string}>await res.json();
+				if (! ('version' in json)) throw 'ネット上の package.json が異常です(blues)';
+				newVerBluesSN = json.version;
+				const tiSV = ActivityBar.#hEnv.SN_BLUES_VER.ti;
+				tiSV.description = '-- ' + newVerBluesSN;
+				ActivityBar.#actBar.#onDidChangeTreeData.fire(tiSV);
+			})
+			.catch((e: unknown)=> console.error('fn:ActivityBar.ts blues %o', e))
+			,
+			fetch('https://raw.githubusercontent.com/famibee/tmp_blues/main/CHANGELOG.md')
+			.then(async res=> {
+				const txt = await res.text();
+				newVerBluesTemp = /\n## v(.+)\s/.exec(txt)?.[1] ?? '';
+				const tiSV = ActivityBar.#hEnv.TEMP_BLUES_VER.ti;
+				tiSV.description = '-- ' + newVerBluesTemp;
+				ActivityBar.#actBar.#onDidChangeTreeData.fire(tiSV);
+			}),
 		]);
 
 		for (const o of aLocalSNVer) {
-			const newVerSN = o.is_new_tmp ?newVerEsmSN :newVerCjsSN;
-			const newVerTemp = o.is_new_tmp ?newVerEsmTemp :newVerCjsTemp;
+			const newVerSN = o.is_blues ?newVerBluesSN :o.is_new_tmp ?newVerEsmSN :newVerCjsSN;
+			const newVerTemp = o.is_blues ?newVerBluesTemp :o.is_new_tmp ?newVerEsmTemp :newVerCjsTemp;
 
 			if (o.ver_temp && newVerTemp !== o.ver_temp) {
 				window.showInformationMessage(`更新があります。【ベース更新】ボタンを押してください（テンプレ ${o.ver_temp}->${newVerTemp}）`);
@@ -831,11 +859,17 @@ ${is_win ?'\n実行後、pyftsubset を見つけられるよう VSCode ターミ
 
 				// package.json
 				const oNewPkgJS = <T_PKG_JSON>await readJson(pathUnZip +'package.json', {encoding: 'utf8'});
-				const lib_name = `@famibee/skynovel${is_new_tmp ?'_esm': ''}`
+				// ⚠️ 新テンプレが esm（@famibee/skynovel_esm）か分家（@famibee/bluesnovel）かは
+				// 取得したテンプレ自身の package.json で判別する（本家⇔分家切替は
+				// repository.url 経由でテンプレそのものを差し替えるため、呼び出し側では決め打てない）
+				const lib_name = ! is_new_tmp ?'@famibee/skynovel'
+					: '@famibee/bluesnovel' in oNewPkgJS.dependencies
+					? '@famibee/bluesnovel' :'@famibee/skynovel_esm';
 				// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
 				const v = <string | undefined>oOldPkgJS.dependencies[lib_name];
-					// 旧package.jsonに同名の依存が無い場合がある（cjs→esm移行等でキー名が変わる）ため未定義を許容
-				if (v?.startsWith('ile:') || v?.startsWith('./')) {
+					// 旧package.jsonに同名の依存が無い場合がある（cjs→esm移行・本家⇔分家切替等で
+					// キー名が変わる）ため未定義を許容
+				if (v?.startsWith('file:') || v?.startsWith('./')) {
 					oNewPkgJS.dependencies[lib_name] = v;
 				}
 				await outputJson(fnTo +'/package.json', {

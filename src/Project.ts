@@ -78,6 +78,7 @@ const	mExt2aFld = new Map<SEARCH_PATH_ARG_EXT, string[]>([
 export type T_LocalSNVer = {
 	ver_sn		: string;
 	is_new_tmp	: boolean;
+	is_blues	: boolean;
 	ver_temp	: string;
 }
 
@@ -215,7 +216,7 @@ export class Project {
 			this.#pc.FLD_SRC,
 			this.#PATH_CRYPT,
 			this.#encry,
-			this.is_blues,
+			()=> this.is_blues,
 		);
 
 		this.#pc.init(
@@ -233,7 +234,7 @@ export class Project {
 		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 		const tiSnUpd = aTi[eDevTreeView.SnUpd]!;
 		this.getLocalSNVer = ()=> {
-			const o = this.#ps.getLocalSNVer();
+			const o = this.#ps.getLocalSNVer(this.is_blues);
 			tiSnUpd.description = o.ver_sn
 				? o.ver_sn.startsWith('ile:') || o.ver_sn.startsWith('./')
 				? '（相対パス参照中）'
@@ -762,19 +763,23 @@ return `- ${name} = ${val} (${String(width)}x${String(height)}) [ファイルを
 
 
 	//MARK: ボタンの処理
+	// ⚠️ 配列の添字は aTiFlat（eDevTreeView＋Pack配下6個）の並びと一致させること。
+	// SwitchEngine 追加（2026-11-11）で Pack 以外が7個・全体13個になった
 	readonly	#hPush2BtnEnable = new Map<PrjBtnName, BtnEnable[]>([
-		['Crypto',		['','','','','','','','','','','','']],
-		['TaskWeb',		['_off', '_off', '', '_off', 'Stop', '_off',
+		['Crypto',		['','','','','','','','','','','','','']],
+		['SwitchEngine',	['_off', '_off', '_off', '_off', '', '_off', '_off',
 						'_off', '_off', '_off', '_off', '_off', '_off']],
-		['TaskWebDbg',	['_off', '_off', '', '_off', 'Stop', '_off',
+		['TaskWeb',		['_off', '_off', '', '_off', '_off', 'Stop', '_off',
 						'_off', '_off', '_off', '_off', '_off', '_off']],
-		['TaskWebStop',	['','','','','','','','','','','','']],
-	//	['TaskApp',		['_off', '_off', '', '_off', '_off', 'Stop',
+		['TaskWebDbg',	['_off', '_off', '', '_off', '_off', 'Stop', '_off',
+						'_off', '_off', '_off', '_off', '_off', '_off']],
+		['TaskWebStop',	['','','','','','','','','','','','','']],
+	//	['TaskApp',		['_off', '_off', '', '_off', '_off', '_off', 'Stop',
 	//						'_off', '_off', '_off', '_off', '_off', '_off']],
-	//	['TaskAppDbg',	['_off', '_off', '', '_off', '_off', 'Stop',
+	//	['TaskAppDbg',	['_off', '_off', '', '_off', '_off', '_off', 'Stop',
 	//						'_off', '_off', '_off', '_off', '_off', '_off']],
 			// NOTE: Stop 実装方法策定中につき無効化中
-		['TaskAppDbgStop', ['','','','','','','','','','','','']],
+		['TaskAppDbgStop', ['','','','','','','','','','','','','']],
 	]);
 	async #onBtn(ti: TreeItem, btn_nm: PrjBtnName, cfg: TREEITEM_CFG) {
 		if (! ActivityBar.getReady('NPM')) return;
@@ -782,7 +787,7 @@ return `- ${name} = ${val} (${String(width)}x${String(height)}) [ファイルを
 		// 値を壊してボタン消去など
 		const aBtnEnable = this.#hPush2BtnEnable.get(btn_nm)
 		?? ['_off', '_off', '_off', '_off', '_off', '_off',
-			'_off', '_off', '_off', '_off', '_off', '_off'];
+			'_off', '_off', '_off', '_off', '_off', '_off', '_off'];
 		this.#aTiFlat.forEach((ti, i)=> {
 			// eslint-disable-next-line @typescript-eslint/restrict-plus-operands, @typescript-eslint/no-non-null-assertion
 			ti.contextValue += aBtnEnable[i]!;
@@ -868,6 +873,36 @@ return `- ${name} = ${val} (${String(width)}x${String(height)}) [ファイルを
 				return;
 			case 'Crypto_waited':	break;	// Promise待ち後
 
+			case 'SwitchEngine':
+				try {
+					const toBlues = ! this.is_blues;
+					let dirty = '';
+					try {
+						dirty = execFileSync('git', ['status', '--porcelain'], {cwd: this.#pc.PATH_WS, encoding: 'utf8'});
+					}
+					catch { /* gitが無い・未初期化などは確認できないだけなので無視 */ }
+
+					const ans = await window.showWarningMessage(
+						`プロジェクトを${toBlues ?'BlueSNovel（分家）' :'SKYNovel（本家）'}に切り替えますか？`,
+						{modal: true, detail: '依存・import先・ビルド設定を書き換えます。元に戻すには git を使って下さい。'
+							+(dirty.trim() ?'\n\n⚠️ 未コミットの変更があります。先にコミットすることをお勧めします。' :'')},
+						'はい',
+					);
+					if (ans !== 'はい') {done(0); return}
+
+					await this.#termDbgSS();
+					await this.#switchEngine(toBlues);
+					await this.#onBtn_sub(ti, 'SwitchEngine_waited', cfg, done);
+				} catch (e) {
+					const mes = 'fn:Project.ts onBtn_sub SwitchEngine ';
+					console.error(`${mes}e:%o`, e);
+					window.showErrorMessage('本家⇔分家切替でエラーが発生しました', {detail: mes+ String(e), modal: true});
+
+					done(0);
+				}
+				return;
+			case 'SwitchEngine_waited':	break;	// Promise待ち後（npm i タスク）
+
 			case 'TaskWebDbg':
 			case 'TaskAppDbg':
 				await this.#termDbgSS();
@@ -949,6 +984,18 @@ return `- ${name} = ${val} (${String(width)}x${String(height)}) [ファイルを
 
 			case 'Crypto_waited':
 				this.hOnEndTask.set(task_type, ()=> {this.#dspCryptoMode(); done()});
+				break;
+
+			case 'SwitchEngine_waited':
+				this.hOnEndTask.set(task_type, ()=> {
+					this.getLocalSNVer();
+					this.#dspCryptoMode();
+					void window.showInformationMessage(
+						'切り替えが完了しました。反映するにはウィンドウの再読み込みが必要です。',
+						'ウィンドウを再読み込み',
+					).then(a=> {if (a) void commands.executeCommand('workbench.action.reloadWindow');});
+					done();
+				});
 				break;
 
 			case 'PackWin':
@@ -1238,6 +1285,106 @@ return `- ${name} = ${val} (${String(width)}x${String(height)}) [ファイルを
 		this.#diff.clear();
 		await this.#initCrypto();
 	}
+
+	//MARK: 本家⇔分家 切替
+	// ESMテンプレ（IS_NEW_TMP）だけが対象。呼び出し元（#onBtn_sub 'SwitchEngine'）が
+	// hide: true でボタン自体を出さないため、ここでは is_new_tmp を確認しない
+	async #swapPkgJsonEngine(toBlues: boolean) {
+		const fnPkgJs = <FULL_PATH>(this.#pc.PATH_WS +'/package.json');
+		const oPkg = <T_PKG_JSON>await readJson(fnPkgJs, {encoding: 'utf8'});
+		const fromKey = toBlues ?'@famibee/skynovel_esm' :'@famibee/bluesnovel';
+		const toKey   = toBlues ?'@famibee/bluesnovel'   :'@famibee/skynovel_esm';
+		if (fromKey in oPkg.dependencies) {
+			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+			oPkg.dependencies[toKey] = oPkg.dependencies[fromKey]!;
+			// eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+			delete oPkg.dependencies[fromKey];
+		}
+		if (oPkg.repository?.url) oPkg.repository.url = toBlues
+			? oPkg.repository.url.replace('tmp_esm_uc', 'tmp_blues')
+			: oPkg.repository.url.replace('tmp_blues', 'tmp_esm_uc');
+			// updPrjFromTmp（ActivityBar.ts）はここのリポジトリ名で取得元テンプレを決める
+		await outputJson(fnPkgJs, oPkg, {spaces: '\t'});
+	}
+
+	// src/**/*.ts・vite*.config.ts の import 先（サブパスはそのまま）を書き換える
+	async #replEngineImports(toBlues: boolean) {
+		const from = toBlues ?'skynovel_esm' :'bluesnovel';
+		const to   = toBlues ?'bluesnovel'   :'skynovel_esm';
+		const reg = new RegExp(`@famibee/${from}(?=['"/])`, 'g');
+		for (const pattern of [
+			`${this.#pc.PATH_WS}/${this.#pc.FLD_SRC}/**/*.ts`,
+			`${this.#pc.PATH_WS}/vite*.config.ts`,
+		]) for await (const fn of glob(pattern)) replaceFile(<FULL_PATH>fn, reg, `@famibee/${to}`, false);
+	}
+
+	// src/main/main.ts の構造差分（パッケージ版アプリの起動方式。tmp_esm_uc/tmp_blues の
+	// 現行差分から。該当しなければ書き換えず false を返す＝ブラウザ実行には影響しない
+	#switchMainTs(toBlues: boolean): boolean {
+		const fnMain = <FULL_PATH>(this.#pc.PATH_WS +`/${this.#pc.FLD_SRC}/main/main.ts`);
+		return toBlues
+		? replaceRegsFile(fnMain, [
+			[
+				/if \(! app\.requestSingleInstanceLock\(\)\) app\.quit\(\);\n\nlet guiWin/,
+				'if (! app.requestSingleInstanceLock()) app.quit();\n\n'
+				+'// パッケージ版はfile://になりfetch()がスキームを受け付けない（prj.json等が読めず起動できない）ため、\n'
+				+'//\thttpと同じ扱いのカスタムスキームで開く。app のready前にしか登録できないのでトップレベルで呼ぶ\n'
+				+'import {appMain} from \'@famibee/bluesnovel/appMain\';\n'
+				+'appMain.registerScheme();\n\nlet guiWin',
+			],
+			[
+				/const \{appMain\} = await import\('@famibee\/skynovel_esm\/appMain'\);/,
+				'appMain.handleScheme(resolve(__dirname, \'../renderer\'));',
+			],
+			[
+				/else w\.loadFile\(resolve\(__dirname, '\.\.\/renderer\/index\.html'\)\);/,
+				'else w.loadURL(\'app://bundle/index.html\');\n\t// else w.loadFile(\'./index.html\');\t\tとかはダメ（2025/01/05）',
+			],
+		], false)
+		: replaceRegsFile(fnMain, [
+			[
+				/\/\/ パッケージ版はfile:\/\/になりfetch\(\)がスキームを受け付けない（prj\.json等が読めず起動できない）ため、\n\/\/\thttpと同じ扱いのカスタムスキームで開く。app のready前にしか登録できないのでトップレベルで呼ぶ\nimport \{appMain\} from '@famibee\/bluesnovel\/appMain';\nappMain\.registerScheme\(\);\n\nlet guiWin/,
+				'let guiWin',
+			],
+			[
+				/appMain\.handleScheme\(resolve\(__dirname, '\.\.\/renderer'\)\);/,
+				'const {appMain} = await import(\'@famibee/skynovel_esm/appMain\');',
+			],
+			[
+				/else w\.loadURL\('app:\/\/bundle\/index\.html'\);\n\t\/\/ else w\.loadFile\('\.\/index\.html'\);\t\tとかはダメ（2025\/01\/05）/,
+				'else w.loadFile(resolve(__dirname, \'../renderer/index.html\'));',
+			],
+		], false);
+	}
+
+	async #switchEngine(toBlues: boolean) {
+		// 1. 暗号化中なら解除し、後で（新エンジン判定後に）戻す
+		const wasCrypto = this.#isCryptoMode;
+		if (wasCrypto) await this.#tglCryptoMode();
+
+		// 2. package.json
+		await this.#swapPkgJsonEngine(toBlues);
+
+		// 3. import 先
+		await this.#replEngineImports(toBlues);
+
+		// 4. main.ts（パッケージ版アプリの起動方式）
+		if (! this.#switchMainTs(toBlues)) void window.showWarningMessage(
+			'main.ts の書き換えパターンが一致しませんでした。手作業で確認して下さい',
+			{modal: true, detail: `${this.#pc.FLD_SRC}/main/main.ts（ブラウザ実行には影響しません）`},
+		);
+
+		// 5. キャッシュ破棄。以降の暗号化判定（snsys_pre_blues・.bin化）がこれを見る
+		this.#is_blues = isBluesPrj(this.#pc.PATH_WS);
+
+		// 6. テンプレ取り込み（依存・scripts・vite.electron.config.ts）。
+		// 3. で repository.url を直してあるので切替先テンプレから取得される
+		await this.actBar.updPrjFromTmp(this.#pc.PATH_WS);
+
+		// 7. 再暗号化（is_blues 更新後なので正しいテンプレ・.bin化可否で作り直される）
+		if (wasCrypto) await this.#tglCryptoMode();
+	}
+
 
 	async #encFile(uri: Uri) {
 		const fsp = normFp(uri.fsPath);
