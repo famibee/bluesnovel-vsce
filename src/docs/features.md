@@ -59,6 +59,15 @@
 		- **URL・インストール数・レビューは 0 から**
 		- 変更箇所は 2 つだけ：`package.json` の name/displayName と
 		`test/int/suite.ts` の `EXT_ID`。vsix 名は `bluesnovel-X.Y.Z.vsix` になる
+		- エディタ内の表示は `BlueSNovel` に寄せ、エンジンを指していた文言は中立化した
+		（「Update engine and template」「GUIで開く」）。**識別子は変えない**
+		（`skynovel.*` コマンドID・言語ID `skynovel`・文法スコープ `source.skynovel`・
+		デバッガ型・`SKYNovel.score`）。変えると利用者のキーバインド・設定・
+		`launch.json`・ファイル関連付けが壊れる
+		- ⚠️ 表示名をエンジン（本家/分家）で切り替えることはできない。
+		`viewsContainers.title` などは静的な文字列で、VSCode 起動時に1つに決まる。
+		コマンドパレットの見出しを切り替えられたのはコマンドを2つ登録できたから
+		（`skynovel.openReferencePallet` と `bluesnovel.openReferencePallet`）
 
 - ~~**リファレンス検索パレットのリンク先を、プロジェクト種別で切り替える**~~
 	→ **実装済み（CHANGELOG v4.31.2）**。判定は `isBluesPrj()`

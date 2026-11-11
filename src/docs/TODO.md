@@ -1,9 +1,8 @@
 # BlueSNovel / SKYNovel拡張機能 TODO
 
-最終更新：2026-10-15（完了分は CHANGELOG.md へ移動。最終的にカラを目指す）
-
 **このファイルの使い方**：下の「残件一覧」だけ見れば、いま何ができるか分かる。
 **このファイルは「いま何をすべきか」だけを持つ。** 設計判断の根拠と経緯・調査結果・実測値（測定値・踏んだ罠・やらないと決めた理由）・宿題の詳細は [README.md](README.md) 。
+完了分は CHANGELOG.md ・コミットメッセージへ移動。最終的にカラを目指す。
 
 ### ⚠️ 数字を書くかどうかの基準
 
@@ -40,44 +39,28 @@ multiroot.md 不具合6件・リソース解放5件、`keywords` の `multi-root
 
 | # | 内容 | 節 |
 |---|---|---|
-| 1 | パッチ生成ツール（試作単体アプリ）。拡張機能とは独立しており Marketplace 再申請の返信待ちとは無関係 | [legacy-app-patch.md](legacy-app-patch.md) |
-| 2 | 拡張機能、VueをReactへ載せ替え（段階的に。次に触る画面から） | 本ファイル ✅決着した判断 |
-
-### 手を動かす必要がある／別環境が要る
-
-**現在なし。**
+| 1 | 本家⇔分家（SKYNovel⇔BlueSNovel）ワンタッチ切替ボタンの実装（2026-11-11 実装すると決定・設計済み） | 本ファイル「本家⇔分家 切替ボタン」 |
+| 2 | パッチ生成ツールの環境・コード削除（2026-11-11 廃止決定。過去ソースは GitHub に残る） | 本ファイル「パッチ生成ツールの削除範囲」 |
 
 ### 前提が揃うまで着手できない
 
 | # | 内容 | 何を待っているか | 節 |
 |---|---|---|---|
 | 1 | tmpwiz を `contributes.walkthroughs` に載せる | **v5.0.0 正式版まで待つ**（移行案内は v4.33.2 で先行公開済み。walkthrough はインストール時に自動で開くので、alpha 中に出すと落ち着いていない画面を全員に見せる） | [features.md](features.md) |
-| 2 | 過去アプリ向けパッチ配布の**拡張機能への統合**（内蔵GUI提供・購入者チェック機構の本結線） | **一時見送り（2026-10-15）**。Marketplace 対応は決着したが、まず試作単体アプリ（パッチ生成ツール）の完成を優先する。設計メモは [legacy-app-patch.md](legacy-app-patch.md) | [features.md](features.md) |
-| 3 | テンプレ本体（tmp_cjs_hatsune 等、外部リポジトリ）の package.json 手改修。rimraf依存の除去は拡張機能側の自動パッチ（package.json改変）で機能的には対応済み（2026-09-14）。テンプレ側は devDependencies の `rimraf` 記載と旧スクリプト文言が残るだけの見た目上の負債 | Marketplace 再申請後の作業 | - |
+| 2 | テンプレ本体（tmp_cjs_hatsune 等、外部リポジトリ）の package.json 手改修。rimraf依存の除去は拡張機能側の自動パッチ（package.json改変）で機能的には対応済み（2026-09-14）。テンプレ側は devDependencies の `rimraf` 記載と旧スクリプト文言が残るだけの見た目上の負債 | Marketplace 再申請後の作業 | - |
 
 ### ❓ 判断待ち（こちらから確認したいこと）
 
-- 本家→分家（SKYNovel→BlueSNovel）プロジェクト切替の自動化 (2026-11-10)
-	切替作業を拡張機能の機能として提供するかどうか、を判断したい。現状は拡張機能に切替機能が無く**全部手作業**
-	（`updPrjFromTmp` は移行先プロジェクトの `src/web.ts`・`src/renderer/renderer.ts` を上書きしない）。
-	以下は sn_kowloon（本家形式・暗号化あり）を手で移行したときに必要だった項目。
-	⚠️ **パス（`src/web.ts` 等）はすべて移行対象のゲームプロジェクト側のものであり、
-	この sn_extension リポジトリには存在しない**：
-	1. `package.json` の `dependencies`：`@famibee/skynovel_esm` → `@famibee/bluesnovel`
-	2. `package.json` の `repository.url`：`tmp_esm_uc` → `tmp_blues`。`updPrjFromTmp`（ActivityBar.ts）は
-		ここのリポジトリ名で取得元テンプレを決めるので、**直さずにベース更新すると本家テンプレの依存・設定が戻る**
-	3. import 先の書き換え（サブパスはそのまま）：`src/web.ts`（`/web`）・`src/renderer/renderer.ts`（`/app`）・
-		`src/main/main.ts`（`/appMain`）・`src/plugin/*/index.ts`（型 import）。`src/web.ts` の `SysWeb` の
-		import 先は `isBluesPrj()` の判定元でもある＝ここを書き換えた時点で拡張機能からは分家扱いになる。
-		ただし `Project.ts` の `is_blues` は `??=` でキャッシュされるので、切替後はウィンドウ再読み込みが要る
-	4. `SysWeb`/`SysApp` の第2引数：分家の `T_HSysBaseArg` は `dip` が必須。本家時代に暗号化した
-		プロジェクトは `(hPlg, {cur: 'prj/', crypto: true})` のままで型エラーになる（現行の `#tglCryptoMode` は
-		`dip: ''` 付きで書くので、5. の暗号化し直しでも直る）
-	5. 暗号化：本家形式の `doc_crypto/`（画像・音声等を `.bin` 化、`ext_num` で拡張子秘匿）と
-		`snsys_pre`（`getStK` を呼ぶ、`setDecAB` が `{ext_num, ab}` を返す）は分家と非互換で、
-		ブラウザ版が `e.getStK is not a function` で真っ白になる。3. の後に**暗号化を解除→再暗号化**すれば、
-		`is_blues` 分岐（`.bin` 化しない・`snsys_pre_blues` テンプレ）で分家形式に作り直せる。
-		鍵（`pass.json`）は解除しても残るので同じ鍵で作り直される
+- 設定パネル（Vue製）の載せ替え先 (2026-11-11)
+	React へ載せ替える方針（2026-09-14）は撤回し、よりコンパクトな技術を再選定することになった。
+	候補は Preact・Svelte・Alpine.js。**Preact（＋手書きバリデーション、vee-validate/yup/pinia を外す）を推奨**したが未確定。
+	- 判断材料：分家エンジンは React 19 + zustand。Preact なら hooks/JSX の書き方が分家と揃う。
+	Svelte はフォーム記述が最短だが分家と別の流儀が増える。Alpine.js は型検査が効かない
+	- 対象は `views/vue` 8ファイル＋ `views/store` 5ファイル、合計約1150行
+	- 2026-11-11 時点のビルド成果物は `setting.js` 279KB・`setting.css` 236KB（CSS は Bootstrap）
+	- ⚠️ 分家エンジンへ渡すデバッグ用コンポーネント（文字レイヤ・画像レイヤとして使う構想）は、
+	分家の React ツリーに載る以上 React コンポーネントである必要がある。設定パネルの技術選定とは別問題
+
 
 ⚠️ **判断を仰いだことは、その場で言うだけでなく必ずここへ書く。**
 `.claude/settings.json` の件は口頭で指摘しただけで一覧に入れず、
@@ -95,61 +78,68 @@ multiroot.md 不具合6件・リソース解放5件、`keywords` の `multi-root
 	ただしwin環境ではアイコン作成機能などでPythonを使用しているので、Python依存を排除できないと実行は出来ないと思われる。
 	この辺を検討したい、というTODO。
 
-- パッチGUIアプリ化 (2026-10-22) 【作業中・次セッション引き継ぎ】
-	配布パッチアプリ（プレイヤー向け。`patch_app`）をartcraft-launcher風のカード表示
-	ランチャーUIにする件。**実装順序1〜6（カードUI・バックエンドコマンド・マニフェスト取得・
-	状態判定・DL・インストール検知）は机上実装・テスト済み。実装順序7
-	（`genLegacyPatch.ts`・`patch_gen_gui`側の変更）が次の着手点**。
-
-	**次に着手するときは必ず
-	[legacy-app-patch.md「引き継ぎ：ランチャーUI化（Tauri）進行中」](legacy-app-patch.md#引き継ぎランチャーui化tauri進行中2026-10-22開始未完了)
-	から読むこと**（ゼロから再開できるようgit状態・コマンド・罠・残作業まで書いてある）。
-	ここには要約を書かない（二重管理を避ける）。
-
 - Win側からの報告 (2026-09-17)
-	legacy-app-patch.md の Windows実機検証（stubビルド・asarパス・asar抽出・exe自動起動）が完了。クロスコンパイル環境（mingw-w64/cargo-xwin）は不要と判明(本機にネイティブのrustupツールチェーンあり)。詳細と残件表の更新は blues-sync の `sn-extension-win-legacypatch-verify` ブランチへ、ビルド済みstub本体(x86_64-pc-windows-msvc)は `sn-extension-win-stub-sn_legacy_patch` ブランチへ、それぞれpush済み。（mac側で受領・legacy-app-patch.mdへ統合済み）
+	build.md「Windows実機確認が必要な項目」の以下7件はまだ未着手（次のWin側作業機会に着手予定）：Dドライブでの起動／空白入りフォルダ名でのサムネイル・ホバーの`%3A`一致／診断表示位置／`revealFileInOS`・`env.openExternal`／pyftsubsetへの`c:/`パス／タスク実行のシェル連結／マルチルートでのLspWs解放。
 
-	一方、build.md「Windows実機確認が必要な項目」の以下7件はまだ未着手（次のWin側作業機会に着手予定）：Dドライブでの起動／空白入りフォルダ名でのサムネイル・ホバーの`%3A`一致／診断表示位置／`revealFileInOS`・`env.openExternal`／pyftsubsetへの`c:/`パス／タスク実行のシェル連結／マルチルートでのLspWs解放。
+## 本家⇔分家 切替ボタン【設計済み・未実装・2026-11-11】
 
-### ✅ 決着した判断（経緯だけ残す）
+ESM テンプレ（`IS_NEW_TMP`）のプロジェクトだけが対象。cjs テンプレには分家が無いのでボタンを出さない。
+⚠️ **以下のパス（`src/web.ts` 等）は移行対象のゲームプロジェクト側のもので、この sn_extension リポジトリには存在しない。**
 
-#### ✅ 拡張機能、VueをReactへ載せ替え【方針決定・未着手・2026-09-14】
+### 処理順（`Project.ts` に `#switchEngine()` を新設。逆方向は置換の向きが逆になるだけ）
 
-**決定（2026-09-14）：移行する方針で確定。段階的に進める**（次に触る画面から順次。
-着手タイミングは未定）。
+1. 確認ダイアログ（modal）。git の未コミット変更があれば警告する（巻き戻し手段は git）。`#termDbgSS()` で実行中のものを止める
+2. 暗号化中なら `#tglCryptoMode()` で解除し、暗号化していたことを覚えておく
+	（`doc_crypto/`・`snsys_pre` プラグインが消え、`SysWeb`/`SysApp` の引数が `(hPlg)` に戻る）
+3. `package.json`：`dependencies` のキーを `@famibee/skynovel_esm` ⇔ `@famibee/bluesnovel` に付け替え、
+	`repository.url` を `tmp_esm_uc` ⇔ `tmp_blues` に書き換える
+4. import 先の書き換え：`src/**/*.ts` と `vite*.config.ts` の `@famibee/skynovel_esm` ⇔ `@famibee/bluesnovel`
+	（サブパス `/web`・`/app`・`/appMain` はそのまま）
+5. `src/main/main.ts` の構造差分を当てる（2026-11-11 に tmp_esm_uc と tmp_blues を diff して確認）。
+	分家はパッケージ版で `file://` の `fetch()` が使えないため、カスタムスキームで開く：
+	- `appMain` を静的 import にし、トップレベルで `appMain.registerScheme()` を呼ぶ
+	- `const {appMain} = await import('…/appMain')` の位置に `appMain.handleScheme(resolve(__dirname, '../renderer'))`
+	- `w.loadFile(resolve(__dirname, '../renderer/index.html'))` → `w.loadURL('app://bundle/index.html')`
 
-- 歴史的経緯から分家と拡張機能のアーキテクチャが違う
-- 動機：デザインモードなどの機能を分家上で作り、プレイヤーに配布するエンジンに間借り
-  するには巨大すぎる……というような機能を拡張機能に追い出す用途で、アーキテクチャ
-  統一に価値がある。開発起動時に拡張機能からデバッグ用コンポーネントを渡し、それを
-  文字レイヤや画像レイヤとして使う、というような。分家側でこの種の機能を1〜2年内に
-  実装する見込みがあるとのこと（2026-09-14 確認）
-- 費用対効果：Vue自体は現行最新水準（3.5.42）で保守切れ懸念はないため、書き換え単体の
-  効果はゼロ。上記の将来受け皿としての価値のみ
-- 工数規模：中（`views/vue` 配下7ファイル。Setting系のみ）
+	パターンが一致しなければ書き換えず、手作業が必要な旨を警告する（ブラウザ実行には影響しない。影響するのはパッケージ版アプリだけ）
+6. `actBar.updPrjFromTmp()` を呼び、切替先テンプレの依存・scripts・`vite.electron.config.ts` を取り込む
+	（3. で `repository.url` を直してあるので切替先テンプレから取得される）。続けて `SnUpd_waited` のタスクでインストール
+7. キャッシュの破棄：`Project.#is_blues` を undefined に戻し、`skynovel.isBlues` コンテキストを更新する。
+	`HDiff` はコンストラクタで `isBlues` を受け取って保持しているので、取得関数を渡す形に変える
+8. 2. で暗号化していたなら `#tglCryptoMode()` で再暗号化する（鍵 `pass.json` は解除しても残る）。
+	分家なら `.bin` 化なし・`snsys_pre_blues` テンプレ・`dip: ''` 付きで作り直される
+9. ウィンドウ再読み込みを促す（LSP は `ready` の `is_blues` で辞書を差し替えるだけで、戻す経路が無い）
 
-#### ✅ UI に残る「SKYNovel」表示【決着・実装済み・2026-07-28】
+### あわせて直す、拡張機能側の本家決め打ち
 
-**判断（2026-07-28）：`displayName` は両方名乗り、エディタ内の表示は BlueSNovel に寄せる。**
+- `ActivityBar.ts` `updPrjFromTmp`：`lib_name` が `@famibee/skynovel(_esm)` 固定。分家ではローカル参照の引き継ぎが効かない。
+	また `v?.startsWith('ile:')` は `slice(1)` していない値に対する判定なので `file:` に一致しない
+- `PrjSetting.ts` `getLocalSNVer`：同じく `lib_name` 固定で、分家プロジェクトは `ver_sn` が空になる
+- `ActivityBar.ts` `chkLastSNVer`：取得するのは skynovel_esm・tmp_esm_uc・SKYNovel・tmp_cjs_uc だけ。
+	分家プロジェクトのテンプレ版を tmp_esm_uc の版と比べてしまう。bluesnovel・tmp_blues の取得と `T_LocalSNVer` への `is_blues` 追加が要る
+- `PrjSetting.ts` `#setTmp_save_ns` に `tmp_blues` が無い
 
-根拠は**利用者の状態**だった。再申請は 8/23 以降で、その頃の利用者は
-**旧版をアンインストールして新版を入れる**という手順を踏んでいる。
-つまり「新しい拡張機能だ」という意識がある状態で画面を見るので、
-エディタ内で SKYNovel を名乗り続ける必要がない。
+### 動作確認（実装後）
 
-| 場所 | 決定 | なぜ |
-|---|---|---|
-| `displayName` | **`BlueSNovel / SKYNovel`** | Marketplace の**検索**で SKYNovel から到達させる必要がある |
-| エディタ内の表示（ツールチップ・設定見出し・デバッガ名・`.ssn` エディタ名・category） | **`BlueSNovel`** | 入れ直した後に見る画面。短い方が読める |
-| 識別子すべて | **変えない** | `skynovel.*` コマンドID・言語ID `skynovel`・文法スコープ `source.skynovel`・デバッガ型・`SKYNovel.score`。変えると利用者のキーバインド・設定・`launch.json`・ファイル関連付けが壊れる |
-| エンジンを指していた名前 | **中立化** | 「Update SKYNovel」→「Update engine and template」／「SKYNovel GUIで開く」→「GUIで開く」 |
+`~/Documents/MacHD2/_Ugai/sn_ver/sn_osk_gitayu`（本家形式・暗号化あり）で、本家→分家→本家と切り替え、
+それぞれ `web` タスクでブラウザ実行する。コンソールにエラーが無いこと・タイトル画面から数行進められることを確認する。
+⚠️ このプロジェクトには未コミットのステージ済み変更がある（2026-11-11 確認）。切替前にコミットするか複製で試す。
+⚠️ ボタンが扱うのはビルド構成だけ。スクリプトのタグやプラグインが分家で動くかは別問題
 
-⚠️ **エンジンで切り替えられない**（この制約が判断を縛った）。v4.31.2 で
-コマンドパレットの見出しを切り替えられたのは**コマンドを2つ登録できたから**
-（`skynovel.openReferencePallet` と `bluesnovel.openReferencePallet`）。
-`viewsContainers.title` などは**静的な文字列**で、VSCode 起動時に1つに決まる。
+## パッチ生成ツールの削除範囲【未実施・2026-11-11】
+
+- フォルダ：`patch_app/`・`patch_gen_gui/`・`.claude/skills/patch-gen-gui-dev/`
+- ソース：`src/genLegacyPatch.ts`・`src/InstallerExtract.ts`・`src/probeInstaller.ts`・`src/LegacyAppCheck.ts`・`src/DownloadUrlCheck.ts`
+- テスト：`test/LegacyAppCheck.test.ts`・`test/InstallerExtract.test.ts`・`test/DownloadUrlCheck.test.ts`
+- 設定：`.gitignore` の Rust 節、`.vscodeignore` の `patch_app/`・`patch_gen_gui/` と説明コメント
+- 依存：`7zip-bin`・`@electron/asar` は、他に使用箇所が無いことを確かめてから外す
+- 文書：`legacy-app-patch.md`、README.md の索引行、features.md の「過去アプリ向けパッチ配布」の項
+- 環境：`~/.cargo/registry`（2026-11-11 時点で 1.1GB）と Rust ツールチェーン。他プロジェクトで Rust を使っていないか確かめてから
+- ブランチ：ローカルと origin の `sn-extension-mac-legacypatch-multi`、blues-sync の `sn-extension-win-legacypatch-verify`・`sn-extension-win-stub-sn_legacy_patch`
+- 残す：`src/genUpdUrl.ts`（`update_check` の URL 差し替え用で、パッチ生成ツールとは別機能）
 
 ---
+
 
 ## 1. VS Marketplace 是正対応【詳細は非公開・`TODO.private.md` へ移動】
 
