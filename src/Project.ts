@@ -1333,7 +1333,9 @@ return `- ${name} = ${val} (${String(width)}x${String(height)}) [ファイルを
 				+'appMain.registerScheme();\n\nlet guiWin',
 			],
 			[
-				/const \{appMain\} = await import\('@famibee\/skynovel_esm\/appMain'\);/,
+				// ⚠️ #replEngineImports() が先に走っているので、この時点で import 先は
+				// 既に新エンジン名（bluesnovel）に書き換わっている
+				/const \{appMain\} = await import\('@famibee\/bluesnovel\/appMain'\);/,
 				'appMain.handleScheme(resolve(__dirname, \'../renderer\'));',
 			],
 			[
@@ -1343,7 +1345,9 @@ return `- ${name} = ${val} (${String(width)}x${String(height)}) [ファイルを
 		], false)
 		: replaceRegsFile(fnMain, [
 			[
-				/\/\/ パッケージ版はfile:\/\/になりfetch\(\)がスキームを受け付けない（prj\.json等が読めず起動できない）ため、\n\/\/\thttpと同じ扱いのカスタムスキームで開く。app のready前にしか登録できないのでトップレベルで呼ぶ\nimport \{appMain\} from '@famibee\/bluesnovel\/appMain';\nappMain\.registerScheme\(\);\n\nlet guiWin/,
+				// ⚠️ #replEngineImports() が先に走っているので、この時点で import 先は
+				// 既に新エンジン名（skynovel_esm）に書き換わっている
+				/\/\/ パッケージ版はfile:\/\/になりfetch\(\)がスキームを受け付けない（prj\.json等が読めず起動できない）ため、\n\/\/\thttpと同じ扱いのカスタムスキームで開く。app のready前にしか登録できないのでトップレベルで呼ぶ\nimport \{appMain\} from '@famibee\/skynovel_esm\/appMain';\nappMain\.registerScheme\(\);\n\nlet guiWin/,
 				'let guiWin',
 			],
 			[
