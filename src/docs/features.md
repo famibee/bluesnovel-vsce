@@ -64,7 +64,7 @@
 		（`skynovel.*` コマンドID・言語ID `skynovel`・文法スコープ `source.skynovel`・
 		デバッガ型・`SKYNovel.score`）。変えると利用者のキーバインド・設定・
 		`launch.json`・ファイル関連付けが壊れる
-		- ⚠️ 表示名をエンジン（本家/分家）で切り替えることはできない。
+		- ⚠️ 表示名をエンジン（SKYNovel/BlueSNovel）で切り替えることはできない。
 		`viewsContainers.title` などは静的な文字列で、VSCode 起動時に1つに決まる。
 		コマンドパレットの見出しを切り替えられたのはコマンドを2つ登録できたから
 		（`skynovel.openReferencePallet` と `bluesnovel.openReferencePallet`）
@@ -153,7 +153,7 @@
 	**114 → 116 タグ**。引数なしのタグは `***` を書かない慣例に従った
 	（`stop_allse.md` / `waitclick.md` と同じ）
 	- `set_cancel_skip` は両エンジンとも**廃止済みで何もしない**
-	（本家も 2023/05/27 に中身を空に）。概要文を `【廃止】スキップ中断予約` にして、
+	（SKYNovel も 2023/05/27 に中身を空に）。概要文を `【廃止】スキップ中断予約` にして、
 	補完・ホバー・引数説明のどこでも廃止と分かるようにした
 	- ✅ **廃止タグはリファレンス検索パレットから外す**（`SET_HAISHI_TAG`、
 	[src/WorkSpaces.ts](../WorkSpaces.ts)）。調べに行く意味が無いため。
@@ -172,7 +172,7 @@
 	→ **実装済み（CHANGELOG v4.31.2）**。ワークスペースごとにタグ辞書を差し替える
 
 - ~~**ギャラリーのリンクは SKYNovel 固定のまま【BlueSNovel 版が無い】**~~
-	→ **無用化（2026-09-12）。ギャラリーが分家（BlueSNovel）でも動くようになったため、
+	→ **無用化（2026-09-12）。ギャラリーが BlueSNovel でも動くようになったため、
 	エンジン別にリンクを切り替える必要自体が無くなった**
 	- `famibee.github.io/SKYNovel_gallery/` への 38 箇所、
 	[src/TreeDPDoc.ts:25](../TreeDPDoc.ts#L25) の【ドキュメント・連絡先】ツリーとも

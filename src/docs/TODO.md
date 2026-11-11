@@ -71,7 +71,7 @@ multiroot.md 不具合6件・リソース解放5件、`keywords` の `multi-root
 - Win側からの報告 (2026-09-17)
 	build.md「Windows実機確認が必要な項目」の以下7件はまだ未着手（次のWin側作業機会に着手予定）：Dドライブでの起動／空白入りフォルダ名でのサムネイル・ホバーの`%3A`一致／診断表示位置／`revealFileInOS`・`env.openExternal`／pyftsubsetへの`c:/`パス／タスク実行のシェル連結／マルチルートでのLspWs解放。
 
-## ✅ 本家⇔分家 切替ボタン【実装・動作確認済み・2026-11-11】
+## ✅ SKYNovel⇔BlueSNovel 切替ボタン【実装・動作確認済み・2026-11-11】
 
 `Project.ts` の `#switchEngine()`。ESM テンプレ（`IS_NEW_TMP`）のプロジェクトだけが対象（cjs テンプレは
 `PrjTreeItem.ts` の `hide` でボタン自体を出さない）。処理順・正規表現の中身はコードのコメント参照。
@@ -88,7 +88,7 @@ multiroot.md 不具合6件・リソース解放5件、`keywords` の `multi-root
 	暗号化された本文がタイトル画面まで正しく復号・表示されることを確認した（コンソールエラー無し）
 	- **この過程で実バグを1件発見・修正**：`#switchMainTs()` は `#replEngineImports()` の**後**に走るため、
 	main.ts 内の import 先はその時点で既に新エンジン名に書き変わっている。にもかかわらず正規表現が
-	旧エンジン名を探していたため、呼び出すたびに一致せず、分家→本家方向で `appMain.registerScheme()` の
+	旧エンジン名を探していたため、呼び出すたびに一致せず、BlueSNovel→SKYNovel方向で `appMain.registerScheme()` の
 	削除が効かない不具合があった（旧エンジン名⇔新エンジン名を取り違えていた）。実機確認で発覚し修正済み
 	- ⚠️ **未解明の事象**：`SwitchEngine_waited` の `npm i` タスクが、この自動テスト環境内では
 	`tasks.executeTask()` 呼び出し後に完了しなかった（`touch` だけの最小タスクや、起動直後に走る
@@ -100,7 +100,7 @@ multiroot.md 不具合6件・リソース解放5件、`keywords` の `multi-root
 	前のプロジェクトのセーブデータが自動ロードされ、無関係な `[autowc]` 例外を「このプロジェクトの
 	不具合」と見誤る。プロジェクトごとに `localStorage.clear()` するか、別ポートを使うこと
 
-⚠️ ボタンが扱うのはビルド構成だけ。スクリプトのタグやプラグインが分家で動くかは別問題
+⚠️ ボタンが扱うのはビルド構成だけ。スクリプトのタグやプラグインが BlueSNovel で動くかは別問題
 
 ## 設定パネルの Preact 載せ替え【確定・未着手・2026-11-11】
 
@@ -110,11 +110,11 @@ multiroot.md 不具合6件・リソース解放5件、`keywords` の `multi-root
 	外すのは `views/setting.html` からの参照だけ。`views/lib` の `bootstrap.*`・`bootstrap2vscode.css` は
 	envinfo・folder・score・tmpwiz・toolbox の5画面がまだ使っているので**ファイルは消さない**。
 	見た目の作り直しになるので `test:ui` と目視で確認する
-- 選定理由：分家エンジンは React 19 + zustand。Preact なら hooks/JSX の書き方が分家と揃い、ランタイムが小さい。
-	Svelte は分家と別の流儀が増える。Alpine.js は型検査が効かない
+- 選定理由：BlueSNovel エンジンは React 19 + zustand。Preact なら hooks/JSX の書き方が BlueSNovel と揃い、ランタイムが小さい。
+	Svelte は BlueSNovel と別の流儀が増える。Alpine.js は型検査が効かない
 - 2026-11-11 時点のビルド成果物は `setting.js` 279KB・`setting.css` 236KB（CSS は Bootstrap）
-- ⚠️ 分家エンジンへ渡すデバッグ用コンポーネント（文字レイヤ・画像レイヤとして使う構想）は、
-	分家の React ツリーに載る以上 React コンポーネントである必要がある。hooks だけで書いておけば同じソースを React 向けにもビルドできる
+- ⚠️ BlueSNovel エンジンへ渡すデバッグ用コンポーネント（文字レイヤ・画像レイヤとして使う構想）は、
+	BlueSNovel の React ツリーに載る以上 React コンポーネントである必要がある。hooks だけで書いておけば同じソースを React 向けにもビルドできる
 
 ---
 

@@ -38,7 +38,7 @@ export class HDiff {
 				readonly FLD_SRC	: string,
 		private readonly PATH_CRYPT	: FULL_PATH,
 		private readonly encry		: Encryptor,
-		// ⚠️ boolean ではなく取得関数。本家⇔分家切替ボタンで実行中に値が変わりうるため
+		// ⚠️ boolean ではなく取得関数。SKYNovel⇔BlueSNovel切替ボタンで実行中に値が変わりうるため
 		private readonly getIsBlues	: ()=> boolean,
 	) {
 		const REG_path2 = `\\/(doc\\/prj|${FLD_SRC}\\/${FLD_PRJ_BASE})\\/`;	// (new RegExp('\')) の場合は、バックスラッシュは２つ必要

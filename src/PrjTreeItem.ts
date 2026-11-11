@@ -76,6 +76,7 @@ export class PrjTreeItem extends TreeItem {
 		wsFld		: WorkspaceFolder,
 		onBtn		: ON_BTN,
 		is_new_tmp	: boolean,
+		is_blues	: boolean,
 	): PrjTreeItem {
 		const bld = `npm i -D electron-builder@26.0.15 ${statBreak} npm run webpack:pro ${statBreak} npx electron-builder`;
 
@@ -106,9 +107,10 @@ export class PrjTreeItem extends TreeItem {
 				{cmd: 'Crypto',		icon: 'gear',	label: '暗号化',task_type: 'Sys', npm: is_new_tmp
 					? 'echo "Crypto"'
 					: 'npm run webpack:dev'},
-				{cmd: 'SwitchEngine',	icon: 'skynovel',	label: '本家⇔分家 切替',
+				{cmd: 'SwitchEngine',	icon: 'skynovel',
+					label: `${is_blues ?'SKYNovel' :'BlueSNovel'}へ切替`,
 					task_type: 'Sys', npm: 'npm i',
-					hide: ! is_new_tmp},	// cjsテンプレには分家が無い
+					hide: ! is_new_tmp},	// cjsテンプレには BlueSNovel が無い
 				{cmd: 'TaskWeb',	icon: 'browser',	label: '起動：ブラウザ版',
 					task_type: 'Web',npm: 'npm run web',	exe: true,},
 				{cmd: 'TaskApp',	icon: 'electron',	label: '起動：アプリ版',

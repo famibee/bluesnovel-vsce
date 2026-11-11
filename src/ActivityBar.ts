@@ -859,15 +859,15 @@ ${is_win ?'\n実行後、pyftsubset を見つけられるよう VSCode ターミ
 
 				// package.json
 				const oNewPkgJS = <T_PKG_JSON>await readJson(pathUnZip +'package.json', {encoding: 'utf8'});
-				// ⚠️ 新テンプレが esm（@famibee/skynovel_esm）か分家（@famibee/bluesnovel）かは
-				// 取得したテンプレ自身の package.json で判別する（本家⇔分家切替は
+				// ⚠️ 新テンプレが esm（@famibee/skynovel_esm）か BlueSNovel（@famibee/bluesnovel）かは
+				// 取得したテンプレ自身の package.json で判別する（SKYNovel⇔BlueSNovel切替は
 				// repository.url 経由でテンプレそのものを差し替えるため、呼び出し側では決め打てない）
 				const lib_name = ! is_new_tmp ?'@famibee/skynovel'
 					: '@famibee/bluesnovel' in oNewPkgJS.dependencies
 					? '@famibee/bluesnovel' :'@famibee/skynovel_esm';
 				// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
 				const v = <string | undefined>oOldPkgJS.dependencies[lib_name];
-					// 旧package.jsonに同名の依存が無い場合がある（cjs→esm移行・本家⇔分家切替等で
+					// 旧package.jsonに同名の依存が無い場合がある（cjs→esm移行・SKYNovel⇔BlueSNovel切替等で
 					// キー名が変わる）ため未定義を許容
 				if (v?.startsWith('file:') || v?.startsWith('./')) {
 					oNewPkgJS.dependencies[lib_name] = v;

@@ -97,6 +97,7 @@ export class Project {
 	readonly	#ds		: Disposable[]	= [];
 
 	#dspCryptoMode;		// 暗号化状態
+	#dspSwitchEngineLabel;	// SKYNovel⇔BlueSNovel 切替ボタンの表示（切替先エンジン名）
 
 	readonly	#aTiFlat: TreeItem[]	= [];
 	enableBtn(enabled: boolean): void {
@@ -194,6 +195,7 @@ export class Project {
 			wsFld,
 			(ti, btn_nm, cfg)=> {void this.#onBtn(ti, btn_nm, cfg)},
 			is_new_tmp,
+			this.is_blues,
 		);
 		aTiRoot.push(pti);
 
@@ -248,6 +250,12 @@ export class Project {
 		this.#dspCryptoMode = ()=> {
 			tiCrypto.description = `-- ${this.#isCryptoMode ?'する' :'しない'}`;
 			emPrjTD.fire(tiCrypto);
+		};
+		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+		const tiSwitchEngine = aTi[eDevTreeView.SwitchEngine]!;
+		this.#dspSwitchEngineLabel = ()=> {
+			tiSwitchEngine.label = `${this.is_blues ?'SKYNovel' :'BlueSNovel'}へ切替`;
+			emPrjTD.fire(tiSwitchEngine);
 		};
 
 		void this.#encry.init()
@@ -873,17 +881,18 @@ return `- ${name} = ${val} (${String(width)}x${String(height)}) [ファイルを
 				return;
 			case 'Crypto_waited':	break;	// Promise待ち後
 
-			case 'SwitchEngine':
+			case 'SwitchEngine':{
+				const toBlues = ! this.is_blues;
 				try {
-					const toBlues = ! this.is_blues;
 					let dirty = '';
 					try {
 						dirty = execFileSync('git', ['status', '--porcelain'], {cwd: this.#pc.PATH_WS, encoding: 'utf8'});
 					}
 					catch { /* gitが無い・未初期化などは確認できないだけなので無視 */ }
 
+					const nmTo = toBlues ?'BlueSNovel' :'SKYNovel';
 					const ans = await window.showWarningMessage(
-						`プロジェクトを${toBlues ?'BlueSNovel（分家）' :'SKYNovel（本家）'}に切り替えますか？`,
+						`プロジェクトを${nmTo}に切り替えますか？`,
 						{modal: true, detail: '依存・import先・ビルド設定を書き換えます。元に戻すには git を使って下さい。'
 							+(dirty.trim() ?'\n\n⚠️ 未コミットの変更があります。先にコミットすることをお勧めします。' :'')},
 						'はい',
@@ -892,15 +901,17 @@ return `- ${name} = ${val} (${String(width)}x${String(height)}) [ファイルを
 
 					await this.#termDbgSS();
 					await this.#switchEngine(toBlues);
+					this.#dspSwitchEngineLabel();
 					await this.#onBtn_sub(ti, 'SwitchEngine_waited', cfg, done);
 				} catch (e) {
 					const mes = 'fn:Project.ts onBtn_sub SwitchEngine ';
 					console.error(`${mes}e:%o`, e);
-					window.showErrorMessage('本家⇔分家切替でエラーが発生しました', {detail: mes+ String(e), modal: true});
+					window.showErrorMessage(`${toBlues ?'BlueSNovel' :'SKYNovel'}への切替でエラーが発生しました`, {detail: mes+ String(e), modal: true});
 
 					done(0);
 				}
 				return;
+			}
 			case 'SwitchEngine_waited':	break;	// Promise待ち後（npm i タスク）
 
 			case 'TaskWebDbg':
@@ -1286,7 +1297,7 @@ return `- ${name} = ${val} (${String(width)}x${String(height)}) [ファイルを
 		await this.#initCrypto();
 	}
 
-	//MARK: 本家⇔分家 切替
+	//MARK: SKYNovel⇔BlueSNovel 切替
 	// ESMテンプレ（IS_NEW_TMP）だけが対象。呼び出し元（#onBtn_sub 'SwitchEngine'）が
 	// hide: true でボタン自体を出さないため、ここでは is_new_tmp を確認しない
 	async #swapPkgJsonEngine(toBlues: boolean) {
