@@ -10,6 +10,8 @@
 
 import {render} from 'preact';
 import {App} from './App';
+import 'img-comparison-slider';
+import 'img-comparison-slider/dist/styles.css';
 import './setting.css';
 
 const elApp = document.getElementById('app');

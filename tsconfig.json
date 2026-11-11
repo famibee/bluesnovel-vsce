@@ -53,9 +53,7 @@
 		//"noPropertyAccessFromIndexSignature": false,	// インデックス型のプロパティ参照に[]を必須にする
 		"noUncheckedIndexedAccess": true,	// undefined の可能性があるプロパティへのアクセスを厳密に
 		"noUnusedLocals": true,		// 使っていないローカル変数をエラーに
-		"noUnusedParameters": false,	// NOTE: vueビルドでエラーが発生するので
-			// https://stackoverflow.com/questions/70051535/props-is-declared-but-its-value-is-never-read-error-occurred-in-vue3-type
-			// https://github.com/vuejs/core/issues/4668
+		"noUnusedParameters": true,	// 使っていない引数をエラーに
 
 		"forceConsistentCasingInFileNames": true,	// import時にファイルパスの文字列で大文字小文字を区別するか
 		//"isolatedDeclarations": true,	// 変数や関数をエクスポート時、ユーザーに明示的な型注釈を求める（トランスパイラ向け）

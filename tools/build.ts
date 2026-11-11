@@ -8,11 +8,7 @@
 const [, , ...aCmd] = process.argv;
 const watch = aCmd.includes('--watch') ?{} :null;
 
-// import {build, type BuildEnvironmentOptions} from 'vite';
-// import vue from '@vitejs/plugin-vue';
-//console.log(`fn:build.ts __dirname:${__dirname}:`);	// src
 import {type BuildOptions, context} from 'esbuild';
-// import {resolve} from 'node:path';
 
 const oBuild: BuildOptions = {
 	target		: 'esnext',
@@ -36,46 +32,6 @@ const oBuild: BuildOptions = {
 		await ctx.dispose();
 	}
 }
-
-// === vue ===
-//	上手くいかないので views/vite.config.mts で
-// build({
-// 	define: {'process.env.NODE_ENV': JSON.stringify(node_env)},
-// 	// root: '',
-// 	root: 'views',
-// 	// base: '/views/',		// 必要
-// 	// base: './views',		// 必要
-// 	// base: '../',		// 必要
-// 	base: './',		// 必要
-// 	build: {
-// 		...<BuildEnvironmentOptions>oBuild,
-// 		// outDir: '../dist',
-// 		// assetsDir: '../assets',
-// 		// assetsDir: 'views/assets',
-// 		// assetsDir: './dist/views/assets',
-// 		rollupOptions: {
-// 			input: {
-// 				setting: resolve(__dirname, 'views/setting.html'),
-// 			},
-// 		},
-// 		// emptyOutDir: false,
-// 		emptyOutDir: true,	// dist 下をクリア
-// 		minify	: prod ?'terser' :false,
-// 		watch,
-// 	},
-// 	plugins: [vue()],
-// 	optimizeDeps: {
-// 		// entries	: ['views/setting.html'],
-// 		entries	: ['setting.html'],
-// 		include	: [
-// 			'lib/bootstrap.bundle.min.js',
-// 			'lib/fontawesome/all.min.js',
-// 			// 'views/lib/bootstrap.bundle.min.js',
-// 			// 'views/lib/fontawesome/all.min.js',
-// 		],
-// 	},
-// //	assetsInclude: ['lib/ * * / *.woff2'],
-// });
 
 {	// === snsys_pre ===
 	const ctx = await context({

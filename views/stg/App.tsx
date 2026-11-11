@@ -7,17 +7,24 @@
 
 import type {ComponentType} from 'preact';
 import {useStg} from './store';
+import {StgBasic} from './StgBasic';
+import {StgApp} from './StgApp';
+import {StgTemp} from './StgTemp';
+import {StgDebug} from './StgDebug';
+import {StgPicOpt} from './StgPicOpt';
+import {StgSndOpt} from './StgSndOpt';
+import {StgPkg} from './StgPkg';
 
 // ⚠️ id は test/ui/runUI.ts が `#nav-{id}-tab`・`#nav-{id}` で参照し、
 // vscode.setState() にも保存される。変えるならテストと合わせて
 const A_TAB: {id: string; nm: string; cmp?: ComponentType}[] = [
-	{id: 'basic',	nm: '基本情報'},
-	{id: 'app',		nm: 'アプリ'},
-	{id: 'temp',	nm: 'テンプレ'},
-	{id: 'debug',	nm: 'デバッグ'},
-	{id: 'PicOpt',	nm: '画像最適化'},
-	{id: 'sndopt',	nm: '音声最適化'},
-	{id: 'pkg',		nm: 'パッケージ'},
+	{id: 'basic',	nm: '基本情報',		cmp: StgBasic},
+	{id: 'app',		nm: 'アプリ',		cmp: StgApp},
+	{id: 'temp',	nm: 'テンプレ',		cmp: StgTemp},
+	{id: 'debug',	nm: 'デバッグ',		cmp: StgDebug},
+	{id: 'PicOpt',	nm: '画像最適化',	cmp: StgPicOpt},
+	{id: 'sndopt',	nm: '音声最適化',	cmp: StgSndOpt},
+	{id: 'pkg',		nm: 'パッケージ',	cmp: StgPkg},
 ];
 
 export function App() {

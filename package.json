@@ -9,7 +9,7 @@
 	"homepage": "https://famibee.blog.fc2.com/",
 	"license": "MIT",
 	"engines": {
-		"vscode": "^1.144.0",
+		"vscode": "^1.145.0",
 		"node": ">=24.21"
 	},
 	"categories": [
@@ -754,7 +754,6 @@
 		]
 	},
 	"dependencies": {
-		"@img-comparison-slider/vue": "^8.0.0",
 		"@vscode/debugadapter": "^1.68.0",
 		"@vscode/debugprotocol": "^1.68.0",
 		"adm-zip": "^0.6.1",
@@ -765,16 +764,12 @@
 		"fs-extra": "^11.4.1",
 		"image-size": "^2.1.0",
 		"minimatch": "^11.0.7",
-		"pinia": "^4.1.0",
 		"psd.js": "^3.9.2",
 		"sharp": "^0.35.5",
 		"str-async-replace": "^1.1.2",
 		"uuid": "^14.0.3",
-		"vee-validate": "^4.15.1",
 		"vscode-languageclient": "^11.0.0",
-		"vue": "^3.5.45",
-		"ws": "^8.22.2",
-		"yup": "^1.7.1"
+		"ws": "^8.22.2"
 	},
 	"devDependencies": {
 		"@eslint/js": "10.0.1",
@@ -789,7 +784,6 @@
 		"@types/vscode": "^1.145.0",
 		"@types/vscode-webview": "^1.57.5",
 		"@types/ws": "^8.18.2",
-		"@vitejs/plugin-vue": "^6.0.10",
 		"@vscode/test-cli": "^0.0.15",
 		"@vscode/test-electron": "^3.1.0",
 		"@vscode/vsce": "^4.1.0",
@@ -799,6 +793,7 @@
 		"eslint-plugin-import": "^2.32.0",
 		"eslint-plugin-jest": "^29.17.0",
 		"globals": "^17.14.0",
+		"img-comparison-slider": "^8.0.7",
 		"jiti": "^2.7.0",
 		"playwright-core": "^1.65.0",
 		"png2icons": "^2.0.1",
@@ -806,16 +801,13 @@
 		"rimraf": "^6.1.4",
 		"typescript": "6.0.3",
 		"typescript-eslint": "^8.72.2",
-		"vite": "^8.3.8",
 		"zustand": "^5.1.0"
 	},
 	"scripts": {
-		"build": "bun md2json && bun vue_bld && bun tools/build.ts",
-		"watch": "bun vue_bw & bun src/md2json.ts --watch & bun --watch tools/build.ts --watch",
+		"build": "bun md2json && bun tools/build.ts",
+		"watch": "bun src/md2json.ts --watch & bun --watch tools/build.ts --watch",
 		"md2json": "bun src/md2json.ts",
 		"gen:updurl": "bun src/genUpdUrl.ts",
-		"vue_bld": "vite build -c ./views/vite.config.mts",
-		"vue_bw": "vite build -w -c ./views/vite.config.mts",
 		"update": "bun update --latest && bun run build && bun ncu_lsp && sudo bun update -g --latest",
 		"ncu_lsp": "cd server && bun update --latest && bun outdated && cd ..",
 		"postinstall": "cd server && bun i && cd ..",
@@ -825,7 +817,7 @@
 		"release_chk": "bun tools/release_chk.ts",
 		"release": "bun tools/release_gh.ts",
 		"pack_only": "bunx @vscode/vsce package --no-dependencies",
-		"vscode:prepublish": "rimraf dist && bun vue_bld && bun md2json && bun run chk:types && bun run lint && bun tools/build.ts",
+		"vscode:prepublish": "rimraf dist && bun md2json && bun run chk:types && bun run lint && bun tools/build.ts",
 		"chk:types": "bun check -p tsconfig.chk.json",
 		"lint": "eslint src server/src test views tools .vscode-test.mjs",
 		"test": "bun test --only-failures",

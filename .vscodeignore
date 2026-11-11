@@ -12,17 +12,7 @@ views/test/
 **/*.ts
 **/*.tsx
 views/stg/
-	# 設定画面のソース。同梱するのは生成物の views/setting.js・setting.css
-**/*.mts
-	# views/vite.config.mts（**/*.ts には一致しない）
-**/*.vue
-
-views/setting.html
-dist/assets/setting.html
-	# 実行時に読むのは vite が出力した dist/setting.html だけ（src/PrjSetting.ts）。
-	# views/setting.html はその入力。dist/assets/setting.html は入力の
-	# <link rel="canonical" href="setting.html"> を vite がアセットと見なして
-	# 複製したもので、どこからも読まれない
+	# 設定画面のソース。同梱するのは生成物の views/setting.js・setting.css・setting.htm
 
 views/score.*
 	# CteScore（SKYNovel.score）凍結中（2026-10-22）。score.ts/score.htm は

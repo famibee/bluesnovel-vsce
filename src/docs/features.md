@@ -74,7 +74,9 @@
 	（[src/CmnLib.ts](../CmnLib.ts)）＝ `<src|core>/web.ts` の SysWeb の import 先。
 	**判定は本体側だけで行い、結果を `ready` で LSP へ渡す**（LSP に I/O を入れない）
 
-- ~~**設定画面の Vue はオーバースペックか**~~ → **調査済み・2026-07-28。Vue のままでよい**
+- ~~**設定画面の Vue はオーバースペックか**~~ → **調査済み・2026-07-28時点ではVue のままでよいと判断**
+	（⚠️ この判断は 2026-11-11〜 の Preact 載せ替えで覆った。[TODO.md](../TODO.md)「設定パネルの
+	Preact 載せ替え」参照。以下は当時の根拠の記録として残す）
 	- ❌ **`contributes.configuration`（VSCode 標準の設定画面）は選択肢に入らない。**
 	この画面が編集しているのは VSCode の設定ではなく、**ゲームプロジェクトの
 	`prj.json` と `package.json`**（[src/PrjSetting.ts](../PrjSetting.ts) の

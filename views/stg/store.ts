@@ -203,8 +203,6 @@ function recv(d: T_E2V) {
 		case 'updpic':
 			set({pathIcon: d.pathIcon, errIcon: d.err_mes, picRev: Date.now()});
 			break;
-
-		case 'init.Vue':	break;	// Vue 版の画面内通知。撤去時に型ごと消す
 	}
 }
 listen(recv);

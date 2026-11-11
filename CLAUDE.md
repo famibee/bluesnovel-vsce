@@ -61,7 +61,7 @@ SKYNovel の全タグの仕様。**タグの引数・既定値・値域を調べ
 
 | | |
 |---|---|
-| `bun run build` | md.json 生成 → Vue ビルド → esbuild |
+| `bun run build` | md.json 生成 → esbuild |
 | `bun run chk:types` | 型検査のみ（`bun check -p tsconfig.chk.json`） |
 | `bun run test:int` | 統合テスト。VSCode を起動して `vscode` API を叩く |
 | `bun run test:ui` | UI テスト。Playwright で画面を操作する |

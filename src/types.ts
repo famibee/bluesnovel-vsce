@@ -395,10 +395,6 @@ export type T_E2V_CFG = {
 	oCfg	: T_CFG;
 }
 
-type T_E2V_INITVUE = {	// stVSCode.ts -> 他の Vue へ
-	cmd		: 'init.Vue';
-}
-
 export type T_E2V_CNVFONT = {
 	cmd			: 'update.cnvFont';
 	aCnvFont	: T_A_CNVFONT;
@@ -436,7 +432,6 @@ export type T_E2V_SELECT_ICON_INFO = {
 export type T_E2V
 	= T_E2V_INIT
 	| T_E2V_CFG
-	| T_E2V_INITVUE
 	| T_E2V_CNVFONT
 	| T_E2V_OPTPIC
 	| T_E2V_OPTSND

@@ -12,7 +12,7 @@
  * - test/int/ … 拡張機能ホストの**内側**で `vscode` API を叩く。
  *   状態の検証は正確だが、**人が見る画面そのものは見ていない**
  * - test/ui/  … Playwright で VSCode の**画面を外から**操作する。
- *   通知ボタンのクリックや webview（Vue の設定画面）に届く
+ *   通知ボタンのクリックや webview（設定画面）に届く
  *
  * ⚠️ セレクタは VSCode の内部 DOM に依存するので、VSCode の更新で壊れうる。
  * 壊れる箇所を自前で抱えるのが Playwright を選んだ代償
@@ -157,20 +157,18 @@ uiCase('アクティビティバーの【開発環境】に環境の行が並ぶ
 });
 
 
-// (7) の「Vue の設定画面を自動テストできるか」の判断材料。
-// ここでは**到達できること**だけを確かめる（Vue の内部構造には触らない）
+// 設定画面（webview）の内部構造には触らず、到達できることだけを確かめる
 uiCase('設定画面（webview）の中身に到達できる', async ({win})=> {
 	const fr = await openStgFrame(win);
 	const body = (await fr.locator('#app').innerText().catch(()=> '(取得不可)'))
 		.replaceAll(/\s+/g, ' ').trim();
 	console.log(`      設定画面の文字: ${body.slice(0, 100) || '(空)'}`);
 	if (body === '' || body === '(取得不可)') {
-		throw new Error('到達はできたが中身が空（Vue が描画していない）');
+		throw new Error('到達はできたが中身が空（描画していない）');
 	}
 });
 
 
-// §3.5「設定画面の Vue はオーバースペックか」の判断材料。
 // **どこまで自動テストできるか**を実地で確かめる。ここが薄いと
 // 「テストできないから作り直す」という誤った理由づけが生まれる
 uiCase('設定画面：7つのタブが出て、切り替わる', async ({win})=> {
@@ -215,6 +213,10 @@ uiCase('設定画面：スライダーを操作できる', async ({win})=> {
 
 uiCase('設定画面：必須項目が空なら検証メッセージが出る', async ({win})=> {
 	const fr = await openStgFrame(win);
+	// ⚠️ Preact 版はタブごとに中身を作り直す（非選択中は作らない。store.ts 参照）ため、
+	// 前のケースがタブを切り替えたままだと「基本情報」の検証文言が DOM に無い
+	await fr.locator('#nav-basic-tab').click();
+	await win.waitForTimeout(300);
 	const n = await fr.locator('text=必須入力項目です').count();
 	console.log(`      「必須入力項目です」の表示数: ${String(n)}`);
 	if (n === 0) throw new Error('フィクスチャは著作者などが空なので、出るはず');

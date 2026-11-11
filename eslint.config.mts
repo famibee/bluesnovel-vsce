@@ -158,15 +158,6 @@ export default defineConfig([
 		},
 	},
 	{
-		name: 'vue の store のみ',
-		files: ['views/store/*.ts'],
-		languageOptions: {
-			globals: {
-				window	: true
-			},
-		},
-	},
-	{
 		name: '設定画面（Preact。ブラウザ環境）',
 		files: ['views/stg/*.{ts,tsx}'],
 		languageOptions: {

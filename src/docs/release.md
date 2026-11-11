@@ -54,8 +54,8 @@
 
 | コマンド | 用途 |
 |---|---|
-| `bun run watch` | 開発。デバッグ実行（F5）の preLaunchTask が自動で呼ぶ。vite と esbuild の watch |
-| `bun run build` | 一回だけの開発ビルド（vue + esbuild + views/*.ts） |
+| `bun run watch` | 開発。デバッグ実行（F5）の preLaunchTask が自動で呼ぶ。esbuild の watch |
+| `bun run build` | 一回だけの開発ビルド（md2json + esbuild） |
 | `bun run chk:types` | 型検査のみ（`bun check -p tsconfig.chk.json`、src + server + test + tools）。リリース経路ではこれが唯一の型検査 |
 | `bun run lint` | ESLint を**全ファイルへ**（約10秒）。**ESLint 拡張機能は開いているファイルしか見ない**ので、これが無いと閉じたファイルの lint エラーに気づけなかった。`vscode:prepublish` からも呼ぶ |
 | `bun test` | テスト |
