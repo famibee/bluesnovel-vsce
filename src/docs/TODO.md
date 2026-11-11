@@ -41,6 +41,7 @@ multiroot.md 不具合6件・リソース解放5件、`keywords` の `multi-root
 |---|---|---|
 | 1 | 本家⇔分家（SKYNovel⇔BlueSNovel）ワンタッチ切替ボタンの実装（2026-11-11 実装すると決定・設計済み） | 本ファイル「本家⇔分家 切替ボタン」 |
 | 2 | パッチ生成ツールの環境・コード削除（2026-11-11 廃止決定。過去ソースは GitHub に残る） | 本ファイル「パッチ生成ツールの削除範囲」 |
+| 3 | 設定パネルを Vue から Preact へ載せ替え（2026-11-11 確定。React 方針は撤回） | 本ファイル「設定パネルの Preact 載せ替え」 |
 
 ### 前提が揃うまで着手できない
 
@@ -51,16 +52,7 @@ multiroot.md 不具合6件・リソース解放5件、`keywords` の `multi-root
 
 ### ❓ 判断待ち（こちらから確認したいこと）
 
-- 設定パネル（Vue製）の載せ替え先 (2026-11-11)
-	React へ載せ替える方針（2026-09-14）は撤回し、よりコンパクトな技術を再選定することになった。
-	候補は Preact・Svelte・Alpine.js。**Preact（＋手書きバリデーション、vee-validate/yup/pinia を外す）を推奨**したが未確定。
-	- 判断材料：分家エンジンは React 19 + zustand。Preact なら hooks/JSX の書き方が分家と揃う。
-	Svelte はフォーム記述が最短だが分家と別の流儀が増える。Alpine.js は型検査が効かない
-	- 対象は `views/vue` 8ファイル＋ `views/store` 5ファイル、合計約1150行
-	- 2026-11-11 時点のビルド成果物は `setting.js` 279KB・`setting.css` 236KB（CSS は Bootstrap）
-	- ⚠️ 分家エンジンへ渡すデバッグ用コンポーネント（文字レイヤ・画像レイヤとして使う構想）は、
-	分家の React ツリーに載る以上 React コンポーネントである必要がある。設定パネルの技術選定とは別問題
-
+**現在なし。**
 
 ⚠️ **判断を仰いだことは、その場で言うだけでなく必ずここへ書く。**
 `.claude/settings.json` の件は口頭で指摘しただけで一覧に入れず、
@@ -101,6 +93,7 @@ ESM テンプレ（`IS_NEW_TMP`）のプロジェクトだけが対象。cjs テ
 	- `const {appMain} = await import('…/appMain')` の位置に `appMain.handleScheme(resolve(__dirname, '../renderer'))`
 	- `w.loadFile(resolve(__dirname, '../renderer/index.html'))` → `w.loadURL('app://bundle/index.html')`
 
+	**該当箇所だけを正規表現で置換する**（2026-11-11 決定。メニュー等の利用者の改変を残すため、テンプレ版での上書きはしない）。
 	パターンが一致しなければ書き換えず、手作業が必要な旨を警告する（ブラウザ実行には影響しない。影響するのはパッケージ版アプリだけ）
 6. `actBar.updPrjFromTmp()` を呼び、切替先テンプレの依存・scripts・`vite.electron.config.ts` を取り込む
 	（3. で `repository.url` を直してあるので切替先テンプレから取得される）。続けて `SnUpd_waited` のタスクでインストール
@@ -121,10 +114,28 @@ ESM テンプレ（`IS_NEW_TMP`）のプロジェクトだけが対象。cjs テ
 
 ### 動作確認（実装後）
 
-`~/Documents/MacHD2/_Ugai/sn_ver/sn_osk_gitayu`（本家形式・暗号化あり）で、本家→分家→本家と切り替え、
-それぞれ `web` タスクでブラウザ実行する。コンソールにエラーが無いこと・タイトル画面から数行進められることを確認する。
-⚠️ このプロジェクトには未コミットのステージ済み変更がある（2026-11-11 確認）。切替前にコミットするか複製で試す。
+対象は **GitHub から取得した tmp_blues 単体**（2026-11-11 決定。sn_osk_gitayu は使わない）。
+ローカルの `../tmp_blues` は依存が `../bluesnovel/` のローカル参照なので使わず、作業用フォルダへ取得し直す。
+
+1. まず**暗号化なし**で `web` タスクを実行し、ブラウザでコンソールにエラーが無いこと・冒頭から数行進められることを確認する
+2. 1. が動いたら、**改めて暗号化して**同じ確認をする
+3. ボタンで分家→本家→分家と切り替え、それぞれで 1. 2. を繰り返す
+
 ⚠️ ボタンが扱うのはビルド構成だけ。スクリプトのタグやプラグインが分家で動くかは別問題
+
+## 設定パネルの Preact 載せ替え【確定・未着手・2026-11-11】
+
+- 対象は `views/vue` 8ファイル＋ `views/store` 5ファイル、合計約1150行
+- vee-validate・yup・pinia を外し、バリデーションは手書きにする
+- **Bootstrap も同時に外し**、VSCode のテーマ変数を使った手書き CSS に置き換える（2026-11-11 決定）。
+	外すのは `views/setting.html` からの参照だけ。`views/lib` の `bootstrap.*`・`bootstrap2vscode.css` は
+	envinfo・folder・score・tmpwiz・toolbox の5画面がまだ使っているので**ファイルは消さない**。
+	見た目の作り直しになるので `test:ui` と目視で確認する
+- 選定理由：分家エンジンは React 19 + zustand。Preact なら hooks/JSX の書き方が分家と揃い、ランタイムが小さい。
+	Svelte は分家と別の流儀が増える。Alpine.js は型検査が効かない
+- 2026-11-11 時点のビルド成果物は `setting.js` 279KB・`setting.css` 236KB（CSS は Bootstrap）
+- ⚠️ 分家エンジンへ渡すデバッグ用コンポーネント（文字レイヤ・画像レイヤとして使う構想）は、
+	分家の React ツリーに載る以上 React コンポーネントである必要がある。hooks だけで書いておけば同じソースを React 向けにもビルドできる
 
 ## パッチ生成ツールの削除範囲【未実施・2026-11-11】
 
@@ -134,8 +145,9 @@ ESM テンプレ（`IS_NEW_TMP`）のプロジェクトだけが対象。cjs テ
 - 設定：`.gitignore` の Rust 節、`.vscodeignore` の `patch_app/`・`patch_gen_gui/` と説明コメント
 - 依存：`7zip-bin`・`@electron/asar` は、他に使用箇所が無いことを確かめてから外す
 - 文書：`legacy-app-patch.md`、README.md の索引行、features.md の「過去アプリ向けパッチ配布」の項
-- 環境：`~/.cargo/registry`（2026-11-11 時点で 1.1GB）と Rust ツールチェーン。他プロジェクトで Rust を使っていないか確かめてから
-- ブランチ：ローカルと origin の `sn-extension-mac-legacypatch-multi`、blues-sync の `sn-extension-win-legacypatch-verify`・`sn-extension-win-stub-sn_legacy_patch`
+- 環境：`~/.cargo/registry`（2026-11-11 時点で 1.1GB）と rustup ツールチェーンを削除する（2026-11-11 決定）
+- ブランチ：ローカルの `sn-extension-mac-legacypatch-multi`、blues-sync の `sn-extension-win-legacypatch-verify`・`sn-extension-win-stub-sn_legacy_patch` を削除する（2026-11-11 決定）。
+	**origin の `sn-extension-mac-legacypatch-multi` は残す**（過去ソースの保管先）
 - 残す：`src/genUpdUrl.ts`（`update_check` の URL 差し替え用で、パッチ生成ツールとは別機能）
 
 ---
