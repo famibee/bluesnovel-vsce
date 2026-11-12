@@ -1,3 +1,9 @@
+## v4.36.0
+
+- feat(switch-engine): 本家⇔分家ワンタッチ切替ボタンを実装
+- chore(legacy-patch): パッチ生成ツール（patch_app・patch_gen_gui）を削除
+- feat(setting): 設定パネルをVueからPreactへ完全移行
+
 ## v4.35.7
 
 CodeQL（Code scanning）API のページネーションを見落としており、1件取りこぼしていた本物のXSS脆弱性を修正。
