@@ -935,6 +935,7 @@ return `- ${name} = ${val} (${String(width)}x${String(height)}) [ファイルを
 			case 'PackWin32':
 			case 'PackMac':
 			case 'PackMacArm64':
+			case 'PackMacUniv':
 			case 'PackLinux':	await this.#termDbgSS();	break;
 
 			case 'PackFreem':{
@@ -1013,6 +1014,7 @@ return `- ${name} = ${val} (${String(width)}x${String(height)}) [ファイルを
 			case 'PackWin32':
 			case 'PackMac':
 			case 'PackMacArm64':
+			case 'PackMacUniv':
 			case 'PackLinux':
 				if (this.#ps.is体験版) {done(); break}
 

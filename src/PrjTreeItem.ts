@@ -33,6 +33,7 @@ export type PrjBtnName =
 	'PackWin32'|
 	'PackMac'|
 	'PackMacArm64'|
+	'PackMacUniv'|
 	'PackLinux'|
 	'PackFreem';
 
@@ -122,10 +123,12 @@ export class PrjTreeItem extends TreeItem {
 					//	-w --x64 --ia32`},
 							// 一パッケージに統合型、ファイルサイズ二倍になる
 					{cmd: 'PackWin32',	icon: 'windows',	label: 'Windows exe ia32', npm: `${bld} -w --ia32`},
-					{cmd: 'PackMac',	icon: 'macosx',		label: 'macOS dmg x64', npm: `${bld} -m --x64`, forMac: true,},
+					{cmd: 'PackMacUniv',	icon: 'macosx',	label: 'macOS dmg universal', npm: `${bld} -m --universal`, forMac: true,},
 					{cmd: 'PackMacArm64',	icon: 'macosx',	label: 'macOS dmg arm64', npm: `${bld} -m --arm64`, forMac: true,},
+					{cmd: 'PackMac',	icon: 'macosx',		label: 'macOS dmg x64', npm: `${bld} -m --x64`, forMac: true,},
 						// Appleシリコンサポート| Electronブログ https://www.electronjs.org/blog/apple-silicon
 							// 将来的にはarm64、x64アプリを1つのユニバーサルバイナリに「マージ」できるパッケージをリリースする予定ですが、このバイナリは巨大であり、ユーザーへの出荷にはおそらく理想的ではないことに注意してください。
+							// → 現在は --universal フラグでマージ可能。サイズは大きくなるが配布を一本化できる。
 					{cmd: 'PackLinux',	icon: 'linux',		label: 'Linux AppImage', npm: `${bld} -l`},
 						// Command Line Interface (CLI) - electron-builder https://www.electron.build/cli
 					{cmd: 'PackFreem',	icon: 'freem',		label: 'ふりーむ！形式 zip', npm: 'npm run webpack:pro'},

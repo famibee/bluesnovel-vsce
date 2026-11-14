@@ -1,3 +1,10 @@
+## v4.36.1
+
+- feat(mac-pack): macOS universal dmg ビルドボタンを追加
+
+electron-builderの--universalフラグでarm64/x64を一本化したdmgを
+生成できるようにし、生成メニューの並びをuniversal→arm64→x64に変更
+
 ## v4.36.0
 
 - feat(switch-engine): 本家⇔分家ワンタッチ切替ボタンを実装
